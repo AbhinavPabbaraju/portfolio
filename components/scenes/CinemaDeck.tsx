@@ -225,18 +225,23 @@ export default function CinemaDeck() {
         onUpdate: (self) => { showcase.scrollRot = (1 - self.progress) * 0.85; },
       });
 
-      /* diner street: camera settles in front; backdrop lags */
-      const ext = document.getElementById("cafeExterior");
-      if (ext) {
-        gsap.fromTo(ext, { scale: 0.93, y: "6vh", transformOrigin: "50% 78%" },
-          { scale: 1, y: 0, ease: "none",
-            scrollTrigger: { trigger: "#work", start: "top 92%", end: "top 8%", scrub: SCRUB.lead, invalidateOnRefresh: true } });
-      }
-      const bdsvg = document.querySelector(".cafe-backdrop svg");
-      if (bdsvg) {
-        gsap.fromTo(bdsvg, { y: "7vh" }, { y: 0, ease: "none",
-          scrollTrigger: { trigger: "#work", start: "top bottom", end: "top top", scrub: SCRUB.trail, invalidateOnRefresh: true } });
-      }
+      /* ── the diner street settles into place ──
+         A dolly, not a slide. Both scene planes are `slice` over a frame they
+         exactly cover, so translating either one opens a strip of bare page
+         along an edge — there is no spare artwork below the kerb, which is
+         where the crop is anchored. Scaling about that same anchor moves
+         everything except the one line that must not move.
+         The near plane travels further than the far one; that difference is
+         the parallax. Timing is identical, per the one-vocabulary rule. */
+      const dolly = (sel: string, from: number) => {
+        const el = document.querySelector(sel);
+        if (!el) return;
+        gsap.fromTo(el, { scale: from, transformOrigin: "50% 100%" },
+          { scale: 1, ease: "none",
+            scrollTrigger: { trigger: "#work", start: "top bottom", end: "top top", scrub: SCRUB.trail, invalidateOnRefresh: true } });
+      };
+      dolly(".cafe-backdrop svg", 1.045);
+      dolly(".cafe-wires svg", 1.1);
     });
     return () => ctx.revert();
   }, []);

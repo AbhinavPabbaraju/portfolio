@@ -6,23 +6,23 @@ export default function ShopFacade() {
                  aria-label="A tiny Japanese ramen shop at night — neon sign, paper lanterns, warm light in the serving window">
               <defs>
                 <linearGradient id="skyG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#08080e"/><stop offset=".7" stopColor="#0b1216"/>
-                  <stop offset="1" stopColor="#131f25"/>
+                  <stop offset="0" stopColor="#0a0817"/><stop offset=".7" stopColor="#120e28"/>
+                  <stop offset="1" stopColor="#1e1440"/>
                 </linearGradient>
                 <linearGradient id="wallG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#1b2327"/><stop offset="1" stopColor="#11181c"/>
+                  <stop offset="0" stopColor="#1f1c3a"/><stop offset="1" stopColor="#16122c"/>
                 </linearGradient>
                 <linearGradient id="roofG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#242e33"/><stop offset="1" stopColor="#151d20"/>
+                  <stop offset="0" stopColor="#292648"/><stop offset="1" stopColor="#1a1634"/>
                 </linearGradient>
                 <linearGradient id="woodG" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0" stopColor="#4a3524"/><stop offset="1" stopColor="#291c11"/>
                 </linearGradient>
                 <linearGradient id="groundG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#0d1215"/><stop offset="1" stopColor="#07070c"/>
+                  <stop offset="0" stopColor="#0e0b22"/><stop offset="1" stopColor="#08061a"/>
                 </linearGradient>
                 <linearGradient id="vmG" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0" stopColor="#29373f"/><stop offset="1" stopColor="#162126"/>
+                  <stop offset="0" stopColor="#2e2b52"/><stop offset="1" stopColor="#1b1838"/>
                 </linearGradient>
                 <radialGradient id="winWarm" cx=".5" cy=".42" r=".75">
                   <stop offset="0" stopColor="#ffe0ae"/><stop offset=".55" stopColor="#f2a656"/>
@@ -49,8 +49,8 @@ export default function ShopFacade() {
     
               {/* ===== the shop ===== */}
               {/* wall */}
-              <rect x="140" y="150" width="720" height="370" fill="url(#wallG)" stroke="#232b2f" strokeWidth="1.5"/>
-              <g stroke="#374247" strokeWidth="1" opacity=".1">
+              <rect x="140" y="150" width="720" height="370" fill="url(#wallG)" stroke="#292546" strokeWidth="1.5"/>
+              <g stroke="#3d3a60" strokeWidth="1" opacity=".1">
                 <line x1="140" y1="196" x2="860" y2="196"/><line x1="140" y1="238" x2="860" y2="238"/>
                 <line x1="140" y1="468" x2="860" y2="468"/><line x1="140" y1="496" x2="860" y2="496"/>
                 <line x1="215" y1="150" x2="215" y2="240"/><line x1="770" y1="470" x2="770" y2="520"/>
@@ -58,9 +58,9 @@ export default function ShopFacade() {
     
               {/* rooftop signboard */}
               <g>
-                <line x1="340" y1="114" x2="340" y2="128" stroke="#2a3338" strokeWidth="4"/>
-                <line x1="660" y1="114" x2="660" y2="128" stroke="#2a3338" strokeWidth="4"/>
-                <rect x="292" y="34" width="416" height="80" rx="8" fill="#11181c" stroke="#2e4a60" strokeWidth="1.5"/>
+                <line x1="340" y1="114" x2="340" y2="128" stroke="#2f2b52" strokeWidth="4"/>
+                <line x1="660" y1="114" x2="660" y2="128" stroke="#2f2b52" strokeWidth="4"/>
+                <rect x="292" y="34" width="416" height="80" rx="8" fill="#16122c" stroke="#2e4a60" strokeWidth="1.5"/>
                 <text x="500" y="86" textAnchor="middle" className="neonP flick"
                       style={{fontFamily:'var(--f-serif)', fontWeight:'900', fontSize:'44px', letterSpacing:'.18em'}}>深夜食堂</text>
                 <text x="500" y="106" textAnchor="middle" className="neonA"
@@ -70,7 +70,7 @@ export default function ShopFacade() {
               {/* awning roof */}
               <rect x="118" y="118" width="764" height="42" fill="url(#roofG)"/>
               <path d="M118,118 h764" stroke="#475a63" strokeWidth="2" opacity=".55"/>
-              <g stroke="#0c1113" strokeWidth="2" opacity=".5">
+              <g stroke="#0d0a1e" strokeWidth="2" opacity=".5">
                 <line x1="158" y1="118" x2="158" y2="160"/><line x1="198" y1="118" x2="198" y2="160"/>
                 <line x1="238" y1="118" x2="238" y2="160"/><line x1="278" y1="118" x2="278" y2="160"/>
                 <line x1="318" y1="118" x2="318" y2="160"/><line x1="358" y1="118" x2="358" y2="160"/>
@@ -86,15 +86,15 @@ export default function ShopFacade() {
     
               {/* AC unit on the roof */}
               <g>
-                <rect x="764" y="88" width="72" height="28" rx="3" fill="#192125" stroke="#2b3539" strokeWidth="1.5"/>
-                <circle cx="786" cy="102" r="9" fill="none" stroke="#2b3539" strokeWidth="2"/>
-                <line x1="806" y1="94" x2="828" y2="94" stroke="#2b3539" strokeWidth="2"/>
-                <line x1="806" y1="102" x2="828" y2="102" stroke="#2b3539" strokeWidth="2"/>
-                <line x1="806" y1="110" x2="828" y2="110" stroke="#2b3539" strokeWidth="2"/>
+                <rect x="764" y="88" width="72" height="28" rx="3" fill="#1e1b3c" stroke="#302c52" strokeWidth="1.5"/>
+                <circle cx="786" cy="102" r="9" fill="none" stroke="#302c52" strokeWidth="2"/>
+                <line x1="806" y1="94" x2="828" y2="94" stroke="#302c52" strokeWidth="2"/>
+                <line x1="806" y1="102" x2="828" y2="102" stroke="#302c52" strokeWidth="2"/>
+                <line x1="806" y1="110" x2="828" y2="110" stroke="#302c52" strokeWidth="2"/>
               </g>
     
               {/* string lights under the awning */}
-              <path id="strEL" d="M146,166 C200,182 260,182 312,168" fill="none" stroke="#1d2428" strokeWidth="1.6"/>
+              <path id="strEL" d="M146,166 C200,182 260,182 312,168" fill="none" stroke="#221f42" strokeWidth="1.6"/>
               <g filter="url(#glowN)">
                 <circle cx="168" cy="172" r="3" fill="#ffd9a0"/><circle cx="200" cy="177" r="3" fill="#8fbcd4"/>
                 <circle cx="232" cy="179" r="3" fill="#ffd9a0"/><circle cx="264" cy="177" r="3" fill="#ffd9a0"/>
@@ -102,22 +102,22 @@ export default function ShopFacade() {
               </g>
     
               {/* drain pipe */}
-              <line x1="152" y1="150" x2="152" y2="520" stroke="#222a2e" strokeWidth="7"/>
-              <line x1="148" y1="240" x2="156" y2="240" stroke="#2c3539" strokeWidth="4"/>
-              <line x1="148" y1="400" x2="156" y2="400" stroke="#2c3539" strokeWidth="4"/>
-              <path d="M152,520 q4,-60 0,-120" stroke="#0c1012" strokeWidth="9" opacity=".35"/>
+              <line x1="152" y1="150" x2="152" y2="520" stroke="#272348" strokeWidth="7"/>
+              <line x1="148" y1="240" x2="156" y2="240" stroke="#322e56" strokeWidth="4"/>
+              <line x1="148" y1="400" x2="156" y2="400" stroke="#322e56" strokeWidth="4"/>
+              <path d="M152,520 q4,-60 0,-120" stroke="#0d0a20" strokeWidth="9" opacity=".35"/>
     
               {/* photo vending machine — one coin, one memory */}
               <g id="vendG">
                 <rect className="vmGlow" x="156" y="294" width="104" height="230" fill="#8fbcd4" opacity=".07" filter="url(#glowB)"/>
-                <rect x="166" y="300" width="84" height="218" rx="6" fill="url(#vmG)" stroke="#36474f" strokeWidth="1.6"/>
+                <rect x="166" y="300" width="84" height="218" rx="6" fill="url(#vmG)" stroke="#3b3766" strokeWidth="1.6"/>
                 {/* lit header */}
                 <rect x="171" y="306" width="74" height="15" rx="3" fill="#8fbcd4" opacity=".2"/>
                 <text x="208" y="317.5" textAnchor="middle" fill="#ff8fcb" opacity=".92" filter="url(#glowN)"
                       style={{fontFamily:'var(--f-serif)', fontWeight:'700', fontSize:'10.5px', letterSpacing:'.34em'}}>写真</text>
                 {/* glass front, three shelves of photo canisters */}
                 <rect x="173" y="328" width="52" height="102" rx="3" fill="#d7e6ed" opacity=".12"/>
-                <g stroke="#455c67" strokeWidth="1.2">
+                <g stroke="#4a4674" strokeWidth="1.2">
                   <line x1="175" y1="362" x2="223" y2="362"/><line x1="175" y1="396" x2="223" y2="396"/>
                 </g>
                 <g rx="2">
@@ -133,19 +133,19 @@ export default function ShopFacade() {
                   <rect x="191" y="410" width="9" height="16" rx="2.5" fill="#d9b35a" opacity=".8"/>
                   <rect x="204" y="410" width="9" height="16" rx="2.5" fill="#7fbfa0" opacity=".8"/>
                 </g>
-                <rect x="173" y="328" width="52" height="102" rx="3" fill="none" stroke="#455c67" strokeWidth="1.4"/>
+                <rect x="173" y="328" width="52" height="102" rx="3" fill="none" stroke="#4a4674" strokeWidth="1.4"/>
                 <line x1="180" y1="334" x2="216" y2="424" stroke="#f0f6f9" strokeWidth="5" opacity=".05"/>
                 {/* selector buttons + coin slot */}
-                <rect x="231" y="330" width="12" height="48" rx="2.5" fill="#121c21"/>
+                <rect x="231" y="330" width="12" height="48" rx="2.5" fill="#171432"/>
                 <circle cx="237" cy="339" r="2.4" fill="#ff8fcb" opacity=".85"/>
                 <circle cx="237" cy="352" r="2.4" fill="#5b93b3" opacity=".85"/>
                 <circle cx="237" cy="365" r="2.4" fill="#86b0a6" opacity=".75"/>
-                <rect x="231" y="386" width="12" height="20" rx="2.5" fill="#0b1114" stroke="#36474f" strokeWidth="1"/>
-                <line x1="237" y1="391" x2="237" y2="401" stroke="#556c77" strokeWidth="2"/>
+                <rect x="231" y="386" width="12" height="20" rx="2.5" fill="#0e0b22" stroke="#3b3766" strokeWidth="1"/>
+                <line x1="237" y1="391" x2="237" y2="401" stroke="#5a5686" strokeWidth="2"/>
                 {/* dispensing hatch */}
-                <rect x="176" y="452" width="64" height="34" rx="4" fill="#0b1114" stroke="#36474f" strokeWidth="1.4"/>
-                <rect x="182" y="458" width="52" height="22" rx="3" fill="#141f25"/>
-                <rect x="176" y="496" width="64" height="3" fill="#36474f" opacity=".6"/>
+                <rect x="176" y="452" width="64" height="34" rx="4" fill="#0e0b22" stroke="#3b3766" strokeWidth="1.4"/>
+                <rect x="182" y="458" width="52" height="22" rx="3" fill="#191637"/>
+                <rect x="176" y="496" width="64" height="3" fill="#3b3766" opacity=".6"/>
                 <ellipse cx="208" cy="519" rx="46" ry="5" fill="#000" opacity=".4"/>
                 {/* hover: the machine hums awake */}
                 <rect className="vmBoost" x="164" y="298" width="88" height="222" rx="7" fill="#cfd0ee" opacity="0"/>
@@ -210,49 +210,49 @@ export default function ShopFacade() {
                   <text x="643" y="291" textAnchor="middle" fill="#e6f0f5" opacity=".92" style={{fontFamily:'var(--f-serif)', fontWeight:'700', fontSize:'30px'}}>ん</text></g>
               </g>
               {/* window frame */}
-              <rect x="300" y="240" width="400" height="188" fill="none" stroke="#0d1316" strokeWidth="9"/>
-              <rect x="300" y="240" width="400" height="188" fill="none" stroke="#324249" strokeWidth="2"/>
+              <rect x="300" y="240" width="400" height="188" fill="none" stroke="#0e0b22" strokeWidth="9"/>
+              <rect x="300" y="240" width="400" height="188" fill="none" stroke="#383468" strokeWidth="2"/>
     
               {/* counter ledge + stools */}
               <rect x="288" y="426" width="424" height="24" rx="4" fill="url(#woodG)"/>
               <path d="M292,428 h416" stroke="#ffcd8c" strokeWidth="1.6" opacity=".35"/>
               <rect x="298" y="450" width="404" height="7" fill="#1a1310"/>
-              <g fill="#101519">
+              <g fill="#151228">
                 <ellipse cx="330" cy="422" rx="14" ry="5"/>
                 <path d="M318,422 a12,9 0 0 0 24,0 Z"/>
                 <rect x="672" y="404" width="12" height="20" rx="2"/>
               </g>
               <g>
-                <ellipse cx="382" cy="466" rx="26" ry="8" fill="#2b3c43"/>
-                <path d="M356,466 a26,8 0 0 0 52,0" fill="#202f35"/>
-                <line x1="368" y1="472" x2="362" y2="518" stroke="#182125" strokeWidth="4"/>
-                <line x1="396" y1="472" x2="402" y2="518" stroke="#182125" strokeWidth="4"/>
-                <line x1="382" y1="474" x2="382" y2="518" stroke="#131b1e" strokeWidth="4"/>
+                <ellipse cx="382" cy="466" rx="26" ry="8" fill="#302c58"/>
+                <path d="M356,466 a26,8 0 0 0 52,0" fill="#252148"/>
+                <line x1="368" y1="472" x2="362" y2="518" stroke="#1d1a3e" strokeWidth="4"/>
+                <line x1="396" y1="472" x2="402" y2="518" stroke="#1d1a3e" strokeWidth="4"/>
+                <line x1="382" y1="474" x2="382" y2="518" stroke="#181534" strokeWidth="4"/>
               </g>
               <g>
-                <ellipse cx="590" cy="466" rx="26" ry="8" fill="#2b3c43"/>
-                <path d="M564,466 a26,8 0 0 0 52,0" fill="#202f35"/>
-                <line x1="576" y1="472" x2="570" y2="518" stroke="#182125" strokeWidth="4"/>
-                <line x1="604" y1="472" x2="610" y2="518" stroke="#182125" strokeWidth="4"/>
-                <line x1="590" y1="474" x2="590" y2="518" stroke="#131b1e" strokeWidth="4"/>
+                <ellipse cx="590" cy="466" rx="26" ry="8" fill="#302c58"/>
+                <path d="M564,466 a26,8 0 0 0 52,0" fill="#252148"/>
+                <line x1="576" y1="472" x2="570" y2="518" stroke="#1d1a3e" strokeWidth="4"/>
+                <line x1="604" y1="472" x2="610" y2="518" stroke="#1d1a3e" strokeWidth="4"/>
+                <line x1="590" y1="474" x2="590" y2="518" stroke="#181534" strokeWidth="4"/>
               </g>
     
               {/* sliding door, lit from inside */}
               <g>
-                <rect x="716" y="268" width="82" height="252" fill="#141b20" stroke="#2e4a60" strokeWidth="2"/>
+                <rect x="716" y="268" width="82" height="252" fill="#191636" stroke="#2e4a60" strokeWidth="2"/>
                 <rect x="724" y="278" width="66" height="130" fill="#d98a3f" opacity=".82"/>
-                <g stroke="#141b20" strokeWidth="3">
+                <g stroke="#191636" strokeWidth="3">
                   <line x1="757" y1="278" x2="757" y2="408"/>
                   <line x1="724" y1="322" x2="790" y2="322"/><line x1="724" y1="366" x2="790" y2="366"/>
                 </g>
-                <rect x="724" y="416" width="66" height="96" fill="#1d262b"/>
-                <rect x="750" y="440" width="5" height="28" rx="2" fill="#394951"/>
+                <rect x="724" y="416" width="66" height="96" fill="#221f42"/>
+                <rect x="750" y="440" width="5" height="28" rx="2" fill="#3e4478"/>
               </g>
     
               {/* vertical neon: 夜 */}
               <g>
-                <line x1="812" y1="150" x2="812" y2="190" stroke="#2a3338" strokeWidth="3"/>
-                <rect x="806" y="188" width="52" height="118" rx="7" fill="#101619" stroke="#2c393f" strokeWidth="1.5"/>
+                <line x1="812" y1="150" x2="812" y2="190" stroke="#2f2b52" strokeWidth="3"/>
+                <rect x="806" y="188" width="52" height="118" rx="7" fill="#151228" stroke="#312d56" strokeWidth="1.5"/>
                 <rect x="811" y="193" width="42" height="108" rx="5" fill="none" stroke="#8fbcd4" strokeWidth="1.4" opacity=".7" filter="url(#glowN)"/>
                 <text x="832" y="262" textAnchor="middle" className="neonA flick2"
                       style={{fontFamily:'var(--f-serif)', fontWeight:'900', fontSize:'34px'}}>夜</text>
@@ -287,7 +287,7 @@ export default function ShopFacade() {
               {/* chalkboard, tonight's specials — leaning by the counter now */}
               <g className="sway s3" style={{transformOrigin:'50% 100%'}}>
                 <rect x="262" y="398" width="80" height="100" rx="5" fill="#5a4a30"/>
-                <rect x="268" y="404" width="68" height="88" rx="3" fill="#11151c"/>
+                <rect x="268" y="404" width="68" height="88" rx="3" fill="#14112a"/>
                 <g stroke="#cfd6e4" strokeWidth="1.8" fill="none" opacity=".7" strokeLinecap="round">
                   <path d="M278,418 h30"/><path d="M278,432 h46"/><path d="M278,446 h38"/>
                 </g>
@@ -326,7 +326,7 @@ export default function ShopFacade() {
     
               {/* street vent steam, stage right */}
               <g>
-                <rect x="826" y="506" width="34" height="12" rx="2" fill="#12191d" stroke="#232b2f" strokeWidth="1.4"/>
+                <rect x="826" y="506" width="34" height="12" rx="2" fill="#171434" stroke="#292546" strokeWidth="1.4"/>
                 <path className="stm b" d="M836,500 C832,486 842,478 836,464 C832,454 840,448 836,436" opacity=".5"/>
                 <path className="stm" d="M850,502 C846,488 856,480 850,466 C846,456 854,450 850,438" opacity=".5"/>
               </g>

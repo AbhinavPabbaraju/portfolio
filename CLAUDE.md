@@ -32,8 +32,66 @@ plainly when a change has not been looked at in a browser.
   a menu dish, a carousel card and a serve-overlay detail.
 - `lib/motion.ts` — every curve, duration and scrub value. `:root` in
   `app/globals.css` mirrors it.
-- `Backdrop.tsx` / `ShopFacade.tsx` are machine-ported SVGs, geometry preserved
-  1:1. Don't reformat them.
+- `ShopFacade.tsx` is a machine-ported SVG, geometry preserved 1:1. Don't
+  reformat it. (Its palette was hue-rotated into the street's violet family;
+  every warm tone — wood, lanterns, window light — was left alone.)
+
+### The street: one frame, three planes
+
+The exterior is a **full-bleed, one-viewport frame** (`.cafe-exterior`,
+`100svh`, clipped on both axes) and the scene covers it.
+`lib/diner/scene.ts` is the one coordinate system: a 1600×1100 grid whose
+`GROUND` (y=740) is the single line everything stands on, plus the pole
+specs and the `sag()` helper. Both planes are `xMidYMax slice` over the
+frame, so they scale like `background-size:cover` and anchor on the road.
+
+**The shop is `SHOP_UNITS` wide on that grid, not in CSS pixels** — this is
+the load-bearing decision. As a fixed 820px against artwork that grew with
+the window, a wide screen blew the street up around a shop that stayed put:
+poles drifted onto the facade, cables sagged across the sign, and the sky
+was scaled off the top of a box only as tall as its contents. Tied to the
+same scale, the picture is identical at every size and only its resolution
+changes — shop x410–1190, poles at 300 and 1300, cable fan clearing the
+sign by 11 units, always. That budget is thin: `SHOP_UNITS` and the sag
+table in `Overhead.tsx` move together, because a bigger shop raises its own
+roof line into the wires. `sync()` derives the scale, the road and the
+shop's box; `.cafe-stage` states the same sums in CSS for the first paint.
+
+The grid is deeper than the drawing (`VB_TOP` is 240 above it) so a tall
+window crops sky rather than flanks. Everything that makes the scene read as
+a street — trees, poles, lamps, houses — lives in the margins.
+
+- `Backdrop.tsx` — the far plane, behind the facade. Sky, moon, clouds, three
+  bands of city, the wet road, both sakura, the flank houses. Hand-authored
+  on the grid; the two trees are one `<defs>` drawing placed twice, the
+  second mirrored.
+- `Overhead.tsx` — the near plane, `.cafe-wires`, drawn **in front of** the
+  facade. Two poles and every cable between them. It has to be in front: the
+  poles stand on the near kerb and the facade owns the middle of the grid, so
+  a cable web drawn behind it is one nobody sees. It fades on the veil's own
+  curve when the camera pushes in — the veil lives inside the stage and
+  cannot reach a sibling above it.
+- Wires anchor on insulator coordinates taken from the pole specs, so a span
+  cannot end anywhere but on hardware. Sag is the only thing making them read
+  as cable, and the fan bottoms out at y≈351 against a sign top at y≈362.
+- **Neither plane may be translated.** They exactly cover the frame with the
+  crop anchored on the kerb, so any `y` on them opens a strip of bare page
+  along an edge. The deck's parallax is a scale about `50% 100%` for that
+  reason — near plane travels further than far, which is the depth.
+- Clouds drift one way, not back and forth. Each bank is drawn twice a grid
+  width apart and travels exactly `-100%` per cycle — one viewBox width on an
+  SVG element — so the trailing copy lands where the leading one started and
+  the loop has no seam. `alternate` is what made the old sky read as a slider.
+- Both sakura are one `<defs>` drawing, the right one mirrored and set back.
+  The crown is a blurred mass first, then clusters in three tones (underside,
+  body, lit rim) — fading one tone leaves it flat and the gaps read as holes.
+  Every cluster carries its own `rotate()`: one drawing repeated fifty times
+  puts its specular highlight at the same offset fifty times, and that is
+  what reads as polka dots.
+- A lamp's bulb and the pool it throws are in different planes. They stay in
+  step only by sharing a class — `.lampFlick{v}` on the bulb, `.lampGlow{v}`
+  on the road, identical duration and delay. `LAMPS` in `scene.ts` is the
+  list; adding a lamp means adding a variant to both rules.
 
 ### Dish labs
 
@@ -140,6 +198,14 @@ preserve-the-design-first, migrate selectors to utilities gradually.
 - The Showcase carousel is still pointer-only — drag to spin, click to open.
   The five projects are all reachable from the menu below, so nothing is lost,
   but the carousel itself has no keyboard path.
+- The diner section is head + one viewport, and `CinemaDeck` rests anything
+  taller than the viewport with its *bottom* on the bottom of the screen — so
+  at rest the visible window is exactly the frame and the section head has
+  scrolled away. That only holds while `.cafe{padding-bottom:0}`.
+- On a phone the grid is cropped so hard that a shop scaled off it would be
+  wider than the window, so `sync()` floors the shop at the gutter. The poles
+  are outside the crop by then; the cables still cross the sky, arriving from
+  off frame on both sides, which is correct rather than a loose end.
 - Dead CSS remains for unported legacy features (loader, dock, trail, badge).
   `Nav.tsx` is superseded by `CardNav.tsx` and unused. Safe to prune, but check
   before deleting — some of it is waiting on a follow-up.

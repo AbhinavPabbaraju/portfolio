@@ -3,7 +3,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "@/lib/gsap";
 import { refreshDeck, scrollToTarget, scrollToY } from "@/lib/lenis";
 import { PROJECTS, type Project } from "@/lib/data/projects";
+import { GROUND, SHOP_UNITS, VB_BOTTOM, VB_H, VB_W } from "@/lib/diner/scene";
 import Backdrop from "./Backdrop";
+import Overhead from "./Overhead";
 import ShopFacade from "./ShopFacade";
 import RainCanvas from "./RainCanvas";
 import RainAudio from "./RainAudio";
@@ -13,9 +15,6 @@ import PhotoGallery from "./PhotoGallery";
 import SectionHead from "@/components/ui/SectionHead";
 
 type Mode = null | "menu" | "photo";
-
-/** Where the backdrop artwork draws its ground, in its own viewBox. */
-const GROUND_VB = 610, VB_W = 1600, VB_H = 720;
 
 /** The Systems Diner — exterior street, cinematic entries, service.
  *  GSAP owns every long timeline; React owns the state machine. */
@@ -30,8 +29,7 @@ export default function Diner() {
   const leaveBtn = useRef<HTMLButtonElement>(null);
   const photoInside = useRef<HTMLDivElement>(null);
   const serve = useRef<HTMLDivElement>(null);
-  const plane = useRef<HTMLDivElement>(null);
-  const backdrop = useRef<HTMLDivElement>(null);
+  const wires = useRef<HTMLDivElement>(null);
   const winBtn = useRef<HTMLButtonElement>(null);
   const vendBtn = useRef<HTMLButtonElement>(null);
 
@@ -42,28 +40,48 @@ export default function Diner() {
   const reduce = useRef(false);
 
   /* — one road for everyone —
-     The shop's street line is 83.55% down its own 1000×620 face (the wall ends
-     at y=520). The backdrop draws its own ground at y=610 of a 1600×720
-     viewBox, and every building, tree and lamp post in it stands on that line.
-     Those two were never tied together, so the shop hovered ~137px above the
-     ground the rest of the scene shared. Line them up, then start the road
-     where the artwork runs out. */
+     The stage is a full-viewport frame and both scene planes cover it, so the
+     artwork's scale is the frame's, not the shop's. This puts the shop on it:
+     `SHOP_UNITS` wide *in grid units*, standing with its own street line (the
+     wall ends 83.55% down its 1000×620 face) on the artwork's road.
+
+     Sizing the shop from the same scale as the street is the whole trick. As
+     a fixed pixel width it stayed put while the artwork grew with the window,
+     so a wide screen blew the street up around it — poles wandering onto the
+     facade, sky scaled off the top of the frame. Tied together, the picture is
+     the same picture at every size and only its resolution changes. */
   useEffect(() => {
     reduce.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const sync = () => {
-      const st = stage.current, pl = plane.current, bd = backdrop.current;
-      if (!st || !pl || !bd) return;
-      const ground = st.offsetTop + st.offsetHeight * 0.8355;
-      const scale = bd.offsetWidth / VB_W;          // the backdrop box is the full 100vw
-      const height = VB_H * scale;
-      bd.style.height = height + "px";
-      bd.style.top = ground - GROUND_VB * scale + "px";
-      pl.style.top = ground - GROUND_VB * scale + height - 1 + "px";
+      const ex = exterior.current, st = stage.current;
+      if (!ex || !st) return;
+      const w = ex.clientWidth, h = ex.clientHeight;
+      if (!w || !h) return;
+      /* `slice` scales to cover and anchors the bottom (xMidYMax), so this is
+         the artwork's scale and the road is a fixed distance off the floor. */
+      const scale = Math.max(w / VB_W, h / VB_H);
+      const ground = h - (VB_BOTTOM - GROUND) * scale;
+      /* On a phone the grid is cropped so hard that a shop scaled off it
+         would be wider than the window; the gutter is the floor. */
+      const pad = Math.min(64, Math.max(20, w * 0.05));
+      const sw = Math.min(SHOP_UNITS * scale, w - 2 * pad);
+      st.style.width = sw + "px";
+      st.style.marginLeft = -sw / 2 + "px";       // `left:50%` is the CSS's
+      st.style.top = ground - sw * 0.62 * 0.8355 + "px";
     };
     sync();
     window.addEventListener("resize", sync);
     window.addEventListener("load", sync);
-    return () => { window.removeEventListener("resize", sync); window.removeEventListener("load", sync); };
+    /* The frame is sized in `svh` and the stage in `aspect-ratio`; neither is
+       final until layout has run at least once, and a web font landing later
+       reflows the section above it. */
+    const ro = new ResizeObserver(sync);
+    if (exterior.current) ro.observe(exterior.current);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", sync);
+      window.removeEventListener("load", sync);
+    };
   }, []);
 
   const snapToWork = useCallback(() => {
@@ -106,6 +124,11 @@ export default function Diner() {
 
     gsap.timeline({ onComplete: finish })
       .to(veil.current, { opacity: 1, duration: 1.1, ease: "power2.inOut" }, 0)
+      /* The veil lives inside the stage, so it can only darken the stage.
+         The overhead plane is a sibling *above* it and would otherwise stay
+         lit while the whole street around it went out — it dims on the
+         veil's own curve instead. */
+      .to(wires.current, { opacity: 0, duration: 1.1, ease: "power2.inOut" }, 0)
       .to(stage.current, { scale: 2.3, duration: 1.55, ease: "power2.inOut" }, 0)
       .to(strips, { yPercent: -115, opacity: 0, duration: 0.75, stagger: 0.08, ease: "power2.in" }, 0.45)
       .to(flare, { opacity: 0.5, duration: 0.4, ease: "power1.in" }, 0.8)
@@ -131,6 +154,7 @@ export default function Diner() {
       card.current?.classList.remove("stamped");
       gsap.set(exterior.current, { opacity: 1 });
       gsap.set(stage.current, { scale: 1 });
+      gsap.set([veil.current, wires.current], { clearProps: "opacity" });
       gsap.set(veil.current, { opacity: 0 });
       gsap.set(stage.current!.querySelector("#winFlare"), { opacity: 0 });
       gsap.set(stage.current!.querySelectorAll("#noren .np"), { yPercent: 0, opacity: 1 });
@@ -177,6 +201,7 @@ export default function Diner() {
     gsap.set(photoCard, { rotationX: -74, y: -26, opacity: 0, transformOrigin: "50% 0%" });
     gsap.timeline({ onComplete: finish })
       .to(veil.current, { opacity: 1, duration: 1.05, ease: "power2.inOut" }, 0)
+      .to(wires.current, { opacity: 0, duration: 1.05, ease: "power2.inOut" }, 0)
       .to(stage.current, { scale: 2.7, duration: 1.5, ease: "power2.inOut" }, 0)
       .to(flare, { opacity: 0.55, duration: 0.4, ease: "power1.in" }, 0.75)
       .to(exterior.current, { opacity: 0, duration: 0.5, ease: "power1.in" }, 1.1)
@@ -198,6 +223,7 @@ export default function Diner() {
       stage.current!.style.transformOrigin = "";
       gsap.set(exterior.current, { opacity: 1 });
       gsap.set(stage.current, { scale: 1 });
+      gsap.set([veil.current, wires.current], { clearProps: "opacity" });
       gsap.set(veil.current, { opacity: 0 });
       gsap.set(stage.current!.querySelector("#vmFlare"), { opacity: 0 });
       gsap.set(photoInside.current!.querySelector("#photoCard"), { clearProps: "all" });
@@ -346,8 +372,7 @@ export default function Diner() {
 
         {/* EXTERIOR — the building is the UI */}
         <div className="cafe-exterior" id="cafeExterior" ref={exterior}>
-          <div className="street-plane" ref={plane} aria-hidden />
-          <div className="cafe-backdrop" ref={backdrop} aria-hidden><Backdrop /></div>
+          <div className="cafe-backdrop" aria-hidden><Backdrop /></div>
           <div className="cafe-stage" id="cafeStage" ref={stage}>
             <ShopFacade />
             <div className="cafe-veil" ref={veil} aria-hidden />
@@ -370,6 +395,9 @@ export default function Diner() {
               <span className="vw-hint" aria-hidden><span className="hand">one coin, one photo</span></span>
             </button>
           </div>
+          {/* The near plane, over the facade: the poles stand on the kerb in
+              front of the shop and their cables cross its roofline. */}
+          <div className="cafe-wires" ref={wires} aria-hidden><Overhead /></div>
           <RainCanvas />
           <a className="alley-link" href="#writing" aria-label="Follow the alley to the Writing section">
             <svg viewBox="0 0 34 26" aria-hidden>

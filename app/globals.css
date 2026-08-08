@@ -470,18 +470,10 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 }
 
 /* ============================================================ WORK — MIDNIGHT MENU */
-/* The vertical clip contains the 2.3× push-in on entry, which would otherwise
-   bleed into the section head above and the menu below.
-   Horizontally it must NOT clip. `.cafe-exterior` lives inside `.wrap`, so its
-   box is ~1052px — but `.cafe-backdrop`, `.street-plane` and `.rain-fx` are
-   each authored `width:100vw` on purpose, and the backdrop parks the sakura
-   (x 8–244), the left alley (238–318) and the right houses (1400+) at the far
-   edges of a 1600-unit viewBox. Clipping both axes here amputated all of it to
-   the middle 1052px: viewBox 362–1238, which is precisely the empty stretch
-   between the flanks. Page-level horizontal scroll is already held by
-   `body{overflow-x:hidden}` — that is the box that is actually 100vw wide.
-   (visible + clip is a legal pair; only scroll/auto/hidden force visible→auto.) */
-.cafe-exterior{overflow-x:visible;overflow-y:clip}
+/* The exterior's own box is set further down, where the scene is: it is a
+   full-bleed one-viewport frame that clips on both axes. The clip is what
+   contains the 2.3× push-in on entry, and it is also the crop that makes the
+   artwork behave like `background-size:cover`. */
 .menu-scene{position:relative;padding:10px 0 6px}
 .menu-scene::before{content:"";position:absolute;inset:-8% -20%;pointer-events:none;
   background:radial-gradient(58% 62% at 50% 42%, rgba(255,196,150,.075), transparent 70%),
@@ -602,18 +594,51 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 .cafe{position:relative}
 
 /* --- exterior stage ---
-   The padding is the scene's headroom. `.cafe-backdrop` is pinned to this
-   box's bottom and its SVG uses `slice`, so every pixel of height here is
-   height the 1600×720 artwork no longer has to crop off the top and bottom —
-   and it's the only place the alley note can sit without being clipped. */
-.cafe-exterior{position:relative;opacity:1;padding-bottom:clamp(72px,9vh,120px)}
+   One viewport, full bleed, and the scene covers it. This is the fix for the
+   scene reading as a narrow band with no sky: the artwork was full-bleed
+   while the shop was a fixed 820px, so the wider the window the more the
+   street scaled up around a shop that stayed put — and the sky went off the
+   top of a box that was only ever as tall as its contents.
+
+   Now the box is the frame. It is `100svh`, both planes are `slice` over it
+   (cover, anchored on the road), and `Diner`'s `sync()` scales the shop off
+   the same number. `overflow:clip` on both axes because this *is* the crop —
+   it used to have to stay visible horizontally so 100vw children could
+   escape a 1052px column, and the column is gone. */
+.cafe-exterior{position:relative;opacity:1;width:100vw;margin-left:calc(50% - 50vw);
+  height:100svh;overflow:clip}
+/* The section is head + one viewport, and CinemaDeck rests anything taller
+   than the viewport with its *bottom* against the bottom of the screen — so
+   at rest the visible window is exactly this frame, and the head above it has
+   scrolled away. That only holds with no padding under it. */
+.cafe{padding-bottom:0}
 /* The top margin is what lets the shop stand ON the street rather than above
-   it. The backdrop is full-bleed, so its scale is fixed by the viewport width;
-   pinning its ground line (viewBox y=610) to the shop's own street line means
-   the artwork reaches 38.1vw above that line. Leave the shop high in the box
-   and all of that — moon, stars, the top two spans — is cropped away. */
-.cafe-stage{position:relative;max-width:980px;margin:clamp(26px,8.5vw,170px) auto 0;aspect-ratio:1000/620;
-  transform-origin:50% 46%;will-change:transform}
+   it. The scene is full-bleed, so its scale is fixed by the viewport width;
+   pinning its ground line (viewBox y=740) to the shop's own street line means
+   the artwork reaches 46.25vw above that line. Leave the shop high in the box
+   and all of that — moon, clouds, both pole tops — is cropped away.
+
+   `max-width` is 820 rather than 980 because the environment is the point of
+   this scene now. The shop is the same distance from the camera either way;
+   what changes is how much street, sky and overhead line fits beside it, and
+   at 980 the facade left roughly one pole's worth of sky and nothing else.
+   Every hit target inside it is a percentage of this box, so they scale with
+   it and nothing needs re-measuring. */
+/* The shop is a fixed width on the artwork's *grid*, not in CSS pixels, and
+   it stands on the road the artwork draws. `sync()` owns width, margin and
+   top; these are the same sums in CSS so the first paint is already right
+   rather than parked at the corner waiting for a measurement.
+
+   `--sc` is the artwork's cover scale — max(100vw/1600, 100svh/1100) —
+   written as the two divisions. JS re-derives it from the measured box, adds
+   the gutter cap, and agrees to the pixel everywhere the cap does not bite.
+   The offset is margin, not `left`: GSAP owns this element's transform for
+   the push-in, and a `translateX(-50%)` would be folded into it. */
+.cafe-stage{position:absolute;left:50%;--sc:max(.0625vw,.0909091svh);
+  width:min(calc(780 * var(--sc)),calc(100vw - 2 * clamp(20px,5vw,64px)));
+  margin-left:calc(-390 * var(--sc));
+  top:calc(100svh - 524 * var(--sc));
+  aspect-ratio:1000/620;transform-origin:50% 46%;will-change:transform}
 .cafe-stage .shop{position:absolute;inset:0;width:100%;height:100%;display:block}
 /* `max-width:none` is the whole reason the rain reaches the flanks. The
    element is authored `width:100vw` like the backdrop and the street plane,
@@ -622,12 +647,12 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
    `.cafe-exterior`, i.e. the ~1052px `.wrap`. That box is almost exactly the
    980px shop, which is why the drizzle used to fall in a column over the
    ramen shop and nowhere else on the street. */
-.rain-fx{position:absolute;top:-24px;bottom:0;left:50%;width:100vw;max-width:none;
-  transform:translateX(-50%);pointer-events:none;z-index:2}
+.rain-fx{position:absolute;inset:0;width:100%;height:100%;max-width:none;
+  pointer-events:none;z-index:3}
 .cafe-veil{position:absolute;inset:-2%;pointer-events:none;opacity:0;z-index:5;
   background:radial-gradient(58% 50% at 50% 45%, transparent 38%, rgba(5,5,9,.94) 76%)}
-.cafe-cap{margin:18px auto 0;text-align:center;font-family:var(--f-mono);font-size:11px;
-  letter-spacing:.14em;color:var(--dim);position:relative;z-index:1}
+.cafe-cap{position:absolute;left:0;right:0;bottom:clamp(52px,7.5vh,104px);text-align:center;
+  font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;color:var(--dim);z-index:3}
 
 /* --- the rain has a sound, and a way to turn it off ---
    Parked in `section.block`'s own bottom padding rather than inside
@@ -686,33 +711,62 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 .rs-cb:checked + .rs-box > .rs-on{transform:rotateX(10deg) rotateY(0deg)}
 .rain-switch.is-live .rs-cb:checked + .rs-box > .rs-on{color:var(--accent-ink)}
 
-/* --- full-bleed street: the world around the shop --- */
-/* Height is the artwork's own aspect (720/1600 = 45%), so `slice` never has a
-   spare axis to crop and the flanks always survive. `top` is then free to be
-   whatever puts the drawn ground on the shop's feet — Diner's `sync()` sets it
-   from the measured stage; the calc here is the same sum, good enough to hold
-   the first frame before that runs. */
-/* The artwork's own top edge was a straight horizontal cut across the
-   full width where the SVG sky met the page background. Masking it out
-   dissolves the scene into the page instead of starting it on a line.
-   A mask rather than an overlay gradient, so it works whatever the
-   section behind it happens to be doing. */
-.cafe-backdrop{position:absolute;top:calc(668px - 38.125vw);left:50%;width:100vw;height:45vw;
-  transform:translateX(-50%);pointer-events:none;z-index:0;overflow:hidden;
-  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 22%);
-  mask-image:linear-gradient(180deg,transparent 0,#000 22%)}
-.cafe-backdrop svg{width:100%;height:100%;display:block}
+/* --- the two scene planes ---
+   Both fill the frame and both are `xMidYMax slice`: they scale to cover it
+   and anchor on the road, so the kerb is always on the floor of the screen
+   and it is sky that a tall window gains and a wide one crops. No JS sizing —
+   the SVGs do their own. */
+.cafe-backdrop,.cafe-wires{position:absolute;inset:0;pointer-events:none;overflow:hidden;
+  /* the frame is the viewport, so its top edge is only ever seen while the
+     scene is arriving or receding under the deck's scale. A short dissolve
+     is all that needs, and any deeper eats visible sky. */
+  -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 7%);
+  mask-image:linear-gradient(180deg,transparent 0,#000 7%)}
+.cafe-backdrop{z-index:0}
+.cafe-backdrop svg,.cafe-wires svg{width:100%;height:100%;display:block}
 .cafe-stage{z-index:1}
+/* the near plane: poles on the kerb in front of the shop, and the cables
+   they carry across its roofline. It is `pointer-events:none` above, which
+   is what keeps the serving window and the vending machine clickable through
+   it — `.cafe-stage` opens a stacking context, so its z-4 buttons cannot
+   climb over a z-2 sibling and never needed to. */
+.cafe-wires{z-index:2}
 .petal{fill:#c98aa6;animation:petalfall 9.5s linear infinite;opacity:0}
 .petal.p2{animation-delay:2.2s}.petal.p3{animation-delay:4.1s}
 .petal.p4{animation-delay:5.8s}.petal.p5{animation-delay:7.4s}.petal.p6{animation-delay:3.2s}
 /* ── cloud drift ──
    Far slower than the fog because they are far further away; parallax
    is carried by speed here, not by size. */
-.bcloud{animation:bcloudDrift 210s linear infinite alternate;will-change:transform}
-.bcloud.c2{animation-duration:290s;animation-direction:alternate-reverse}
-.bcloud.c3{animation-duration:360s}
-@keyframes bcloudDrift{from{transform:translate3d(-3%,0,0)}to{transform:translate3d(3%,0,0)}}
+/* One direction, because wind has one. Each bank is drawn twice a grid-width
+   apart and travels exactly `-100%` per cycle — on an SVG element that is one
+   viewBox width, so the trailing copy arrives exactly where the leading one
+   started and the loop has no seam. `alternate` was the giveaway before: the
+   whole sky reversing on a timer is not weather, it is a slider. */
+.bcloud{animation:bcloudDrift 200s linear infinite;will-change:transform}
+.bcloud.c2{animation-duration:280s}
+.bcloud.c3{animation-duration:355s}
+.bcloud.c4{animation-duration:440s}
+@keyframes bcloudDrift{from{transform:translate3d(0,0,0)}to{transform:translate3d(-100%,0,0)}}
+
+/* ── stars, and a city that isn't asleep ──
+   Opacity only, and only on a handful of elements: a sky where every star
+   twinkles reads as film grain. The base value is in CSS rather than on the
+   element, so `animation:none` under reduced motion leaves them lit instead
+   of snapping to full. */
+.bstar{opacity:.5;animation:bstar 6.5s ease-in-out infinite}
+.bstar.s2{animation-duration:9s;animation-delay:-3s}
+.bstar.s3{animation-duration:11.5s;animation-delay:-7s}
+.bstar.s4{animation-duration:8.2s;animation-delay:-5s}
+.bstar.s5{animation-duration:13.7s;animation-delay:-11s}
+/* dip, recover, dip again — a star scintillates, it does not breathe. The
+   durations are mutually prime-ish so fifteen of them never fall into step. */
+@keyframes bstar{0%,100%{opacity:.62}28%{opacity:.16}46%{opacity:.5}68%{opacity:.22}}
+/* somebody in the block opposite is still up. Steps, not a fade — a room
+   light goes off, it does not dim. */
+.winf{opacity:.5;animation:winf 19s steps(1,end) infinite}
+.winf.w2{animation-duration:27s;animation-delay:-6s}
+.winf.w3{animation-duration:23s;animation-delay:-14s}
+@keyframes winf{0%,46%{opacity:.5}47%,52%{opacity:.06}53%,100%{opacity:.5}}
 
 /* ── ground fog ──
    Transform-only, so the whole band stays on the compositor and never
@@ -753,19 +807,10 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 .cafe-exterior:has(.alley-link:hover) .alGlow,
 .cafe-exterior:has(.alley-link:focus-visible) .alGlow{opacity:.85}
 
-/* --- shared street plane: shop, trees, houses all stand on one road --- */
-/* Picks up exactly where the backdrop's artwork stops and carries the road to
-   the foot of the section, so it opens on the sky gradient's bottom stop and
-   there is no seam at the join. (It used to carry a hairline at its top edge
-   for the horizon; the horizon is drawn in the artwork now, and the same line
-   here would land across the middle of the road.) */
-.street-plane{position:absolute;left:50%;transform:translateX(-50%);width:100vw;bottom:-6px;top:78%;
-  z-index:0;background:linear-gradient(180deg,#0f1d28,#080f14 60%)}
-
 /* the alley that leads to the field notes — parked below the street */
 /* bottom was -8px — hung outside the padding box, so the vertical clip took a
    bite out of the last line. It now sits inside, in the padding added above. */
-.alley-link{position:absolute;z-index:3;right:calc(50% - 50vw + clamp(28px,4.5vw,100px));bottom:18px;
+.alley-link{position:absolute;z-index:4;right:clamp(28px,4.5vw,100px);bottom:clamp(16px,2.4vh,34px);
   display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;max-width:210px}
 .alley-link svg{width:30px;height:24px;overflow:visible}
 .alley-link .hand{font-size:1.08rem;line-height:1.25;opacity:.7;transition:opacity var(--dur-sm) var(--ease)}
@@ -783,6 +828,7 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 .lampFlick{animation:lampf 5.2s linear infinite}
 .lampFlick.l2{animation-duration:7.4s;animation-delay:1.7s}
 .lampFlick.l3{animation-duration:6.1s;animation-delay:3.2s}
+.lampFlick.l4{animation-duration:8.3s;animation-delay:.8s}
 @keyframes lampf{0%,54%,57.5%,95.5%,98%,100%{opacity:1}55.8%{opacity:.3}96.8%{opacity:.55}}
 /* ── what the bulb throws on the ground ──
    Same clock as `lampf` — identical duration and delay, and the keyframe
@@ -796,8 +842,14 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
    blink (deep dip, then flutter) while the ground read as a single one, and
    two things on one clock looked like two clocks. The ground therefore swings
    harder, to land both blinks on the same beat as the bulb's. */
+/* Two of these bulbs are not even in the same SVG as the ground they light —
+   the pole lamps hang in the near plane and their pools are painted on a road
+   drawn behind the shop. Identical duration and delay on elements that mount
+   together cannot drift, and that is the whole of the synchronisation. */
 .lampGlow{animation:lampg 5.2s linear infinite}
 .lampGlow.l2{animation-duration:7.4s;animation-delay:1.7s}
+.lampGlow.l3{animation-duration:6.1s;animation-delay:3.2s}
+.lampGlow.l4{animation-duration:8.3s;animation-delay:.8s}
 @keyframes lampg{0%,54%,57.5%,95.5%,98%,100%{opacity:1}55.8%{opacity:.12}96.8%{opacity:.38}}
 .sway{animation:sway 5.4s ease-in-out infinite alternate;transform-box:fill-box;transform-origin:50% -8%}
 .sway.s2{animation-delay:2.3s;animation-duration:6.1s}
@@ -937,7 +989,11 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
   .rs-box,.rs-off,.rs-on{transition:none}
   .bfog{animation:none}
   .bcloud{animation:none}
+  .bstar,.winf{animation:none}
   .bfly{display:none}
+  /* petals only exist inside their keyframes — stopping the animation would
+     leave six invisible dots, so they go entirely */
+  .petal{display:none}
   .sw-hint,.vw-hint{opacity:1;transform:translateX(-50%)}
 }
 

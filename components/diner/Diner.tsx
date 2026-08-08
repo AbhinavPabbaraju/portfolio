@@ -10,6 +10,7 @@ import ShopFacade from "./ShopFacade";
 import RainCanvas from "./RainCanvas";
 import RainAudio from "./RainAudio";
 import MenuCard from "./MenuCard";
+import MenuFlourish from "./MenuFlourish";
 import ServeOverlay from "./ServeOverlay";
 import PhotoGallery from "./PhotoGallery";
 import SectionHead from "@/components/ui/SectionHead";
@@ -413,6 +414,9 @@ export default function Diner() {
           <div className="counter-top" ref={counter} aria-hidden />
           <div className="menu-scene">
             <div className="neon-sign" aria-hidden>営業中</div>
+            {/* the room either side of the menu — dead margin until now */}
+            <MenuFlourish side="left" />
+            <MenuFlourish side="right" />
             <div className="fold-wrap">
               <MenuCard ref={card} onTaste={serveDish}>
                 <ServeOverlay ref={serve} project={servedProject} onClose={() => closeServe()} />

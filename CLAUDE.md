@@ -93,6 +93,19 @@ a street — trees, poles, lamps, houses — lives in the margins.
   on the road, identical duration and delay. `LAMPS` in `scene.ts` is the
   list; adding a lamp means adding a variant to both rules.
 
+### The menu's margins
+
+`MenuFlourish.tsx` is the engraved pilaster either side of the paper menu —
+the room's furniture, filling margins that were dead space. Three stacked
+pieces (cap, rod, waist, rod, flipped cap) rather than one tall SVG, because
+the menu's height is whatever five dishes come to and a single drawing
+stretched to that would distort or letterbox. Strokes are
+`non-scaling-stroke`: hairline at any size is what makes it read as engraving.
+It is drawn in `--paper` at low alpha — the menu's own material, embossed, not
+a second decorative language — and hidden below **1120px**, where the column's
+gutters are all the margin there is. `.menu-scene` is shared with the photo
+gallery, so the ornament is mounted from `Diner`, not from that class.
+
 ### Dish labs
 
 Two projects serve an interactive model instead of a paragraph. `ServeOverlay`

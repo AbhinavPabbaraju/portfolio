@@ -901,6 +901,57 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
   box-shadow:inset 0 2px 0 rgba(255,205,140,.28), inset 0 -14px 22px rgba(0,0,0,.5), 0 -8px 30px rgba(255,150,70,.06)}
 .counter-top::after{content:"";position:absolute;inset:0;border-radius:var(--r-md) var(--r-md) 0 0;opacity:.14;mix-blend-mode:overlay;
   background:repeating-linear-gradient(90deg, rgba(0,0,0,.5) 0 2px, transparent 2px 56px)}
+/* --- the ornament flanking the menu ---
+   `.menu-scene` is the containing block, so `top/bottom:0` spans exactly the
+   menu's own height — however many dishes that comes to. Horizontally it
+   escapes the column the way every other full-bleed part of this section
+   does: `50% - 50vw` is the page edge measured from a box that is only ever
+   `--maxw` wide, and the clamp is the gutter in from there.
+
+   Everything is drawn in `--paper` because that is the menu's own material —
+   the ornament reads as the same stock, embossed, rather than as a second
+   decorative language. It is dim on purpose: it has to furnish the margin
+   without ever competing with the thing it frames. */
+.menu-flourish{position:absolute;top:0;bottom:0;z-index:0;pointer-events:none;
+  width:clamp(84px,9vw,180px);
+  display:flex;flex-direction:column;align-items:center;
+  /* Gilt, not paper. Two tones and no gradient: the caps take the highlight
+     and the rod between them sits a shade deeper, which is enough to read as
+     metal catching the counter light without a single `url(#…)` — those
+     would need a unique id per instance, and this renders four times.
+     A literal rather than a token because it is diegetic, like the lantern
+     oranges and the window's sodium: this is gold leaf in a room, not a new
+     accent in the system. */
+  --mf:rgba(235,212,160,.82);
+  --mf-rod:rgba(216,180,120,.62);
+  /* the gilding blooms slightly in a dim room — this is what stops hairlines
+     reading as a wireframe */
+  filter:drop-shadow(0 0 5px rgba(226,178,106,.25));
+  /* light still falls off toward the page edge, but only at the very edge:
+     the fade used to start at 62% and took the ornament with it. The mask is
+     applied before the mirror below, which is why one gradient serves both
+     sides. */
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 28%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 28%);
+  animation:mfIn var(--dur-scene) var(--ease) .5s both}
+.menu-flourish.mf-left{left:calc(50% - 50vw + clamp(12px,3vw,72px))}
+.menu-flourish.mf-right{right:calc(50% - 50vw + clamp(12px,3vw,72px));transform:scaleX(-1)}
+@keyframes mfIn{from{opacity:0}to{opacity:1}}
+
+.mf-cap,.mf-mid{display:block;width:100%;height:auto;flex:none;overflow:visible}
+.mf-cap path,.mf-cap circle,.mf-mid path,.mf-mid circle{stroke:var(--mf);stroke-width:1;fill:none}
+/* the foot is the cap again, stood on its head — one drawing, both ends */
+.mf-foot{width:100%;transform:scaleY(-1)}
+/* The rod takes up whatever height the caps leave. Borders rather than SVG
+   strokes so it stays a crisp 1px at any length, matching the caps' own
+   non-scaling strokes; 3.5% is the 7-unit rod of a 200-unit viewBox, so the
+   two line up whatever the ornament is scaled to. */
+.mf-rod{flex:1 1 auto;width:3.5%;border-left:1px solid var(--mf-rod);border-right:1px solid var(--mf-rod)}
+
+/* Below this the margins are gone: the card is 820px and the column's
+   gutters are all that is left either side of it. */
+@media(max-width:1120px){.menu-flourish{display:none}}
+
 .fold-wrap{perspective:1500px}
 .cafe-inside .menu-scene{margin-top:-14px}
 .leave{display:block;margin:28px auto 0;font-family:var(--f-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;
@@ -990,6 +1041,8 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
   .bfog{animation:none}
   .bcloud{animation:none}
   .bstar,.winf{animation:none}
+  /* base opacity is 1, so killing the animation just shows it */
+  .menu-flourish{animation:none}
   .bfly{display:none}
   /* petals only exist inside their keyframes — stopping the animation would
      leave six invisible dots, so they go entirely */

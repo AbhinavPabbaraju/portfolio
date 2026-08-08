@@ -1,11 +1,9 @@
-import SectionHead from "@/components/ui/SectionHead";
 import { STACK } from "@/lib/data/stack";
 
 export default function About() {
   return (
     <section className="block" id="about">
       <div className="wrap">
-        <SectionHead eyebrow="00 — Profile" />
         <div className="about-grid">
           <p className="about-lead">
             Third-year CS &amp; Engineering student who likes the hard, unglamorous parts of computing —

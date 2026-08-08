@@ -71,8 +71,7 @@ export default function Contact() {
   return (
     <section className="contact" id="contact">
       <div className="wrap">
-        <span className="eyebrow">05 — Contact</span>
-        <h2 style={{ marginTop: "var(--s-2)" }}>
+        <h2>
           Let’s build<br />
           something <RotatingWord words={["fast", "big", "bold", "effective", "correct", "that lasts"]} />
           <span className="rotor-dot">.</span>

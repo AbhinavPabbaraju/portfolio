@@ -340,7 +340,6 @@ export default function Showcase() {
   return (
     <section className="showcase" id="showcase">
       <div className="sc-head"><div className="wrap">
-        <span className="eyebrow">01 — Showcase</span>
         <span className="section-num">scroll to pan · click a card</span>
       </div></div>
       <div className="stage" ref={stageRef}>

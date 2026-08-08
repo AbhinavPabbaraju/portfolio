@@ -366,7 +366,6 @@ export default function Diner() {
     <section className="block cafe" id="work" ref={section}>
       <div className="wrap">
         <SectionHead
-          eyebrow={<>02 — <span lang="ja">深夜食堂</span> · The Shop</>}
           title={<>Come in.<br />We’re open late.</>}
           aside="a Tokyo backstreet · 23:47 · still raining"
         />

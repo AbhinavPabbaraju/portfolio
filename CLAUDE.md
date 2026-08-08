@@ -188,9 +188,14 @@ On `:root` in `app/globals.css`. Use the token, not the literal:
   face was loaded the moment it drew. `AsciiGlitchName` and the Showcase card
   textures both wait on `document.fonts.ready` and repaint; anything new that
   paints type into a canvas has to do the same or it's a race.
-- `.eyebrow` is an `inline-flex` row, so its label has to stay a **single
-  element** — `SectionHead` wraps it for that reason. Passing a fragment makes
-  every text run its own flex item, each taking the `.7em` gap.
+- Sections carry **no numbered label**. "01 — Showcase" and its five siblings
+  read as a table of contents pasted over a page meant to be one continuous
+  shot, and made each scene announce itself before you could look at it.
+  `SectionHead` is title + optional aside; the asides stay, because one of
+  them ("scroll to pan · click a card") is the carousel's only usage hint.
+- `.eyebrow` survives for `app/not-found.tsx` alone. It is an `inline-flex`
+  row, so its label has to stay a **single element** — a fragment makes every
+  text run its own flex item, each taking the `.7em` gap.
 
 Legacy CSS ships wholesale beneath the Tailwind `@theme` layer —
 preserve-the-design-first, migrate selectors to utilities gradually.

@@ -20,7 +20,7 @@ export default function Now() {
   return (
     <section className="block" id="now">
       <div className="wrap">
-        <SectionHead eyebrow="04 — Now" title="On the grid this season." />
+        <SectionHead title="On the grid this season." />
         <div className="now-layout">
           <p className="now-intro">
             Three lanes open at once: the F1 dashboard getting its final polish,

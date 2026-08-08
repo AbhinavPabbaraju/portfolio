@@ -180,19 +180,15 @@ export default function CinemaDeck() {
         });
       };
 
-      fly("#about .block-head", { y: [10, -9] });
       fly("#about .about-lead", { y: [16, -12], x: [-3, 2] });
       fly("#about .about-body", { y: [22, -8], trail: true });
       fly("#about .facts", { y: [10, -5], trail: true });
       fly("#about .stackloop", { y: [12, -6], x: [3, -3], trail: true });
-      fly("#showcase .sc-head .eyebrow", { y: [12, -10], x: [-4, 3] });
       fly("#showcase .sc-head .section-num", { y: [8, -14], x: [4, -3] });
       fly("#work .block-head h2", { y: [14, -10], x: [-5, 4] });
-      fly("#work .block-head .eyebrow", { y: [9, -7] });
       fly("#work .block-head .section-num", { y: [5, -13] });
       fly("#work .cafe-cap", { y: [8, -4], trail: true });
       fly("#writing .block-head h2", { y: [14, -10], x: [6, -4] });
-      fly("#writing .block-head .eyebrow", { y: [9, -7] });
       fly("#writing .note", (i) => ({
         y: [9 + i * 4, -(5 + i * 3)], x: [i % 2 ? 3 : -3, i % 2 ? -2 : 2],
       }));

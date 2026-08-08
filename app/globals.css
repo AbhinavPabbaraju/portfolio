@@ -269,7 +269,11 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 .stage .hint{position:absolute;bottom:22px;left:50%;transform:translateX(-50%);z-index:3;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--dim);display:flex;gap:10px;align-items:center;pointer-events:none}
 .stage .hint em{font-style:normal;color:var(--accent-2)}
 .showcase .sc-head{position:absolute;top:34px;left:0;right:0;z-index:3;pointer-events:none}
+/* The hint is the only thing left in this bar now that the numbered label is
+   gone, and `space-between` would park a lone child at the left. It belongs
+   opposite the carousel's own weight, so it keeps its own right alignment. */
 .showcase .sc-head .wrap{display:flex;justify-content:space-between;align-items:center}
+.showcase .sc-head .section-num{margin-left:auto}
 
 /* ============================================================ RAIN BACKDROP
    "quiet-snail-9" by SelfMadeSystem (@SelfMadeSystem), uiverse.io, MIT.

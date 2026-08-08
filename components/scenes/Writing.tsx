@@ -5,7 +5,7 @@ export default function Writing() {
   return (
     <section className="block" id="writing">
       <div className="wrap">
-        <SectionHead eyebrow="03 — Writing" title="Notes from the pit wall." aside="field notes · in progress" />
+        <SectionHead title="Notes from the pit wall." aside="field notes · in progress" />
         <div className="notes">
           {NOTES.map((n) => (
             <a

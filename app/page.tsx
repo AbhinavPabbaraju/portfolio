@@ -3,7 +3,7 @@ import KineticStrip from "@/components/scenes/KineticStrip";
 import About from "@/components/scenes/About";
 import Showcase from "@/components/scenes/Showcase";
 import Diner from "@/components/diner/Diner";
-import Writing from "@/components/scenes/Writing";
+import Library from "@/components/scenes/Library";
 import Now from "@/components/scenes/Now";
 import Contact from "@/components/scenes/Contact";
 import CinemaDeck from "@/components/scenes/CinemaDeck";
@@ -38,8 +38,9 @@ export default function Home() {
       <Hold long />
       <Diner />
       <Hold />
-      <Writing />
-      <Hold />
+      {/* long: the walk along the shelves plays out in this hold */}
+      <Library />
+      <Hold long />
       <Now />
       <Hold />
       <Contact />

@@ -1054,6 +1054,38 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
   .sw-hint,.vw-hint{opacity:1;transform:translateX(-50%)}
 }
 
+/* ============================================================ THE LIBRARY
+   A pixel-art reading room you walk along sideways. Everything about this
+   block exists to keep logical pixels landing on whole device pixels — see
+   `lib/library/pixel.ts`. The room's width and height are set in JS to an
+   exact integer multiple of its logical size; CSS must not stretch it. */
+.library{padding:0;position:relative}
+.lib-frame{position:relative;width:100vw;margin-left:calc(50% - 50vw);
+  height:100svh;overflow:clip;background:#0b0908}
+.lib-room{position:absolute;left:0;top:0;max-width:none;will-change:transform;
+  image-rendering:pixelated}
+/* Every edge in this room is a pixel edge. Without this the browser
+   antialiases the rectangles and the whole style dissolves into mush. */
+.lib-room rect,.lib-room polygon{shape-rendering:crispEdges}
+/* the pools of lamp light are the one thing allowed a soft edge, and even
+   they are stepped rather than blurred — see `Pool` */
+.lib-room polygon{shape-rendering:auto}
+
+/* A spine that goes somewhere lifts out of the shelf when you reach for it.
+   2px at logical scale, which is 8–12 real pixels: small on the grid, plain
+   at a glance. */
+.lib-book{cursor:pointer;transform-box:fill-box;transform-origin:50% 100%;
+  transition:transform var(--dur-xs) var(--ease)}
+.lib-book:hover,.lib-book:focus-visible{transform:translateY(-2px)}
+.lib-book:focus-visible{outline:none}
+.lib-book:focus-visible rect:first-of-type{stroke:var(--accent-2);stroke-width:1}
+
+.lib-hint{position:absolute;right:clamp(16px,3vw,48px);bottom:clamp(14px,2.4vh,32px);
+  z-index:2;font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;
+  color:var(--dim);pointer-events:none}
+
+@media(prefers-reduced-motion:reduce){.lib-book{transition:none}}
+
 /* ============================================================ WRITING */
 .notes{border-top:1px solid var(--line)}
 .note{display:grid;grid-template-columns:auto 1fr auto;gap:clamp(14px,3vw,34px);align-items:center;padding:22px 8px;border-bottom:1px solid var(--line);transition:background var(--dur-sm) var(--ease)}
@@ -1067,6 +1099,18 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 @media(max-width:768px){.note{grid-template-columns:1fr auto;gap:6px 16px}.note .date{grid-column:1/-1;order:-1}}
 
 /* ============================================================ NOW */
+/* This scene is shorter than the viewport it is pinned in, so its content
+   sat at the top of a `100svh` box with all the slack below it. Centre it in
+   whatever is left over.
+
+   `margin-block:auto` rather than `justify-content:center`, because auto
+   margins collapse to zero when the content outgrows the box: the section
+   stays top-anchored and readable instead of overflowing off both edges with
+   its heading out of reach. That also makes the rule self-limiting — it does
+   nothing at all on a viewport short enough for the content to fill. */
+#now{display:flex;flex-direction:column}
+#now > .wrap{margin-block:auto}
+
 .now-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2)}
 .now-card{position:relative;border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s-2);background:linear-gradient(180deg,var(--surface),var(--bg-2));transition:border-color var(--dur-sm) var(--ease),transform var(--dur-sm) var(--ease)}
 .now-card:hover{border-color:var(--line-2);transform:translateY(-3px)}

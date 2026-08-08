@@ -221,6 +221,36 @@ export default function CinemaDeck() {
         onUpdate: (self) => { showcase.scrollRot = (1 - self.progress) * 0.85; },
       });
 
+      /* ── the walk along the library wall ──
+         The room is wider than the screen, and the dwell is where you cross
+         it: scroll maps to travel along the wall, so the scene holds still in
+         the deck's terms while the camera tracks sideways. Same device as the
+         carousel's unroll — the hold is real document distance and this is
+         what spends it.
+
+         Travel is a function, not a number: it depends on the room's rendered
+         width, which is an integer multiple of a logical size and therefore
+         changes in steps as the viewport does. `invalidateOnRefresh` re-reads
+         it rather than latching the value measured at build. */
+      const libRoom = document.querySelector<SVGSVGElement>(".lib-room");
+      const libFrame = document.querySelector<HTMLElement>(".lib-frame");
+      if (libRoom && libFrame) {
+        const libHold = (() => {
+          const spacer = document.querySelector("#writing")?.nextElementSibling;
+          return spacer?.classList.contains("cine-hold")
+            ? (spacer as HTMLElement).offsetHeight / window.innerHeight : 1;
+        })();
+        gsap.fromTo(libRoom, { x: 0 }, {
+          x: () => -Math.max(0, libRoom.getBoundingClientRect().width - libFrame.clientWidth),
+          ease: "none", duration: libHold,
+          scrollTrigger: {
+            trigger: "#writing", start: "bottom bottom",
+            end: () => "+=" + window.innerHeight * libHold,
+            scrub: SCRUB.lead, invalidateOnRefresh: true,
+          },
+        });
+      }
+
       /* ── the diner street settles into place ──
          A dolly, not a slide. Both scene planes are `slice` over a frame they
          exactly cover, so translating either one opens a strip of bare page

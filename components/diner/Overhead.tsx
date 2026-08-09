@@ -1,4 +1,5 @@
-import { GROUND, POLE_L, POLE_R, VB_W, VIEWBOX, sag, type PoleSpec } from "@/lib/diner/scene";
+import { CASTERS, GROUND, POLE_L, POLE_R, VB_W, VIEWBOX, sag, type PoleSpec } from "@/lib/diner/scene";
+import CastShadows, { ShadowFilters } from "./CastShadow";
 
 /* ── why this is its own layer ──
    The poles stand on the near kerb, closer to the camera than the shop, so
@@ -168,7 +169,36 @@ export default function Overhead() {
         <filter id="oblur" x="-80%" y="-80%" width="260%" height="260%">
           <feGaussianBlur stdDeviation="9" />
         </filter>
+        <ShadowFilters ns="o" />
       </defs>
+
+      {/* ── what the poles take out of the road ──
+          A shadow is drawn in the same plane as the thing casting it, always.
+          The two planes are scaled differently by the deck's parallax, so a
+          pole drawn here with its shadow drawn in `Backdrop` would come apart
+          from it on the first scrub — the pole would walk out of its own
+          shadow. The lamps are allowed to be in the other plane, because a few
+          units of drift in a shadow's *direction* is invisible where the same
+          drift in its *anchor* is not.
+
+          Each pole gets the two lamps that are actually near it. The other two
+          are three hundred units away and, by the time inverse-square is done
+          with them, contribute a shadow nobody could see — drawing them anyway
+          is how a scene ends up with four shadows under everything, which is
+          the look of a render with the lights left on by mistake.
+
+          Both lamps on each side sit outboard of their pole, so the two
+          shadows agree about direction and stack into one darker rake instead
+          of crossing. That is a fact about where the lamp arms reach, not a
+          convenience: the arms point away from the shop, and so does the
+          light, and so does the shadow. */}
+      {([
+        ["", CASTERS.poleL, POLE_L], ["l3", CASTERS.kerbL, POLE_L],
+        ["l2", CASTERS.poleR, POLE_R], ["l4", CASTERS.kerbR, POLE_R],
+      ] as const).map(([v, light, pole]) => (
+        <CastShadows key={`${v}-${pole.x}`} ns="o" v={v}
+          objects={[{ light, x: pole.x, y: GROUND, w: 18, top: pole.top }]} />
+      ))}
 
       <g fill="none" strokeLinecap="round" stroke={WIRE}>
         {/* pass-over traffic: high, edge to edge, tied to poles off frame */}

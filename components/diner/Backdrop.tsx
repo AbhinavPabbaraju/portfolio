@@ -1,5 +1,54 @@
 import type { ReactElement } from "react";
-import { GROUND, LAMPS, VB_BOTTOM, VB_H, VB_TOP, VB_W, VIEWBOX } from "@/lib/diner/scene";
+import { CASTERS, GROUND, LAMPS, VB_BOTTOM, VB_H, VB_TOP, VB_W, VIEWBOX } from "@/lib/diner/scene";
+import CastShadows, { ShadowFilters } from "./CastShadow";
+
+/* ── what stands on this plane, and what light finds it ──
+   Base centre, width, and the height it reaches, for everything in this plane
+   solid enough to put a hole in a lamp's throw. Kept as data next to the
+   shadows rather than inline with the drawings, because the two flanks are 800
+   units apart in the file and the point of the list is that you can see, in
+   one place, that every occluder has been accounted for.
+
+   `soft` is for things that are mostly air: a bicycle is a few tubes and two
+   rims, and it does not put down a bicycle-shaped hole. Halving the density is
+   the whole of the model — anything finer would be drawing spokes.
+
+   The lamp each one is paired with is the lamp that is *near* it. The other
+   three are hundreds of units away and inverse-square has finished with them
+   long before they reach; drawing all four anyway is how a picture ends up
+   with a cat's cradle of shadows under every object, which reads as a render
+   with the lights left on rather than as a street. */
+const OCCLUDERS: [x: number, w: number, top: number, lights: (keyof typeof CASTERS)[], soft?: number][] = [
+  /* ── the left kerb ── everything here is west of both left lamps, so every
+     shadow rakes away to the left and off the frame, which is correct: the
+     lamps are between these objects and the shop.
+
+     The crates, the planter and the two doorstep pots opposite were on this
+     list and are not any more. They stand thirty units tall, which at half the
+     lamp height is a shadow shorter than it is wide — and a dozen of those,
+     blurred and overlapping, is not a lit street, it is a grubby one. What
+     survives is what has the height to throw something with a shape. */
+  [144, 86, 686, ["kerbL", "poleL"], 0.5],          // the bicycle
+  /* The traffic mirror stands *between* the two left lamps, so it is the one
+     object on the street that throws two shadows in opposite directions —
+     which is the plainest possible demonstration that these are radial. */
+  [236, 10, 632, ["kerbL", "poleL"]],
+  /* The kerb lamp's own post, lit by the pole lamp above and behind it. A
+     lamp post with no shadow of its own is the detail that gives away a scene
+     where the lights were added last. */
+  [256, 5, 576, ["poleL"]],
+  /* The cherry. Only the trunk: the crown sits at y≈395, which is *above* the
+     pole lamp's bulb and far above the kerb lamp's, and a mass above the bulb
+     throws its shadow up into the air behind, not down onto the road. The
+     drawing gets that for free from the height cap — but it is worth saying
+     out loud, because a tree with no pool of shade under it looks like an
+     oversight and is in fact the geometry. */
+  [137, 60, 533, ["kerbL", "poleL"]],
+
+  /* ── the right kerb ── */
+  [1404, 48, 574, ["poleR", "kerbR"]],              // the second cherry's trunk
+  [1512, 5, 588, ["poleR"]],                        // the alley lamp's post
+];
 
 /* ── the palette ──
    A backstreet at 2am is not black, it is violet: the sky over a lit city
@@ -438,6 +487,7 @@ export default function Backdrop() {
             <ellipse cx="126" cy="620" rx="2.6" ry="1.1" />
           </g>
         </g>
+        <ShadowFilters ns="n" />
       </defs>
 
       <rect x="0" y={VB_TOP} width={VB_W} height={VB_H} fill="url(#nsky)" />
@@ -666,6 +716,15 @@ export default function Backdrop() {
             rectangle lying in the road is a rectangle lying in the road. They
             lengthen and thicken as they come forward, on the same
             foreshortening as the centre line. */}
+        {/* The join itself. The facade's frame ends at grid y≈820 — 80 units
+            of road short of the bottom — and everything it draws on the ground
+            has to be gone by then or it gets cut off by its own viewBox. Which
+            means the light *does* stop on a line, and no amount of fading
+            inside the facade can fix that: the fix has to come from this side.
+            This ellipse is centred on the join and reaches well above and
+            below it, so the two halves of the road hand over inside a soft
+            gradient instead of at an edge. */}
+        <ellipse cx="800" cy="820" rx="300" ry="58" fill="#f2a656" opacity=".05" filter="url(#nblur)" />
         <ellipse cx="800" cy={GROUND + 106} rx="252" ry="46" fill="#f2a656" opacity=".035" filter="url(#nblur)" />
         <g fill="#ffcf9a" opacity=".055">
           <ellipse cx="800" cy={GROUND + 88} rx="228" ry="1.8" />
@@ -755,6 +814,27 @@ export default function Backdrop() {
           <path d="M1236,748 C1234,741 1231,737 1227,734" />
           <path d="M1239,748 C1240,741 1243,738 1247,735" />
         </g>
+
+        {/* ── what the kerb takes back out of the road ──
+            Last in the road group, so a shadow falls across the puddles, the
+            markings and the grit the way it falls across everything else —
+            and *after* the throws, because a shadow is not a dark shape laid
+            on the ground, it is light that did not arrive. Draw it before the
+            pools and it would be lighting itself back up.
+
+            Still inside the road group, which means it is all behind the
+            flanks: every object here is drawn later in this file and closes
+            over the near end of its own shadow, which is what stops one
+            looking like a mat the object is standing on. */}
+        {(Object.keys(CASTERS) as (keyof typeof CASTERS)[]).map((k) => (
+          <CastShadows
+            key={k} ns="n" v={CASTERS[k].v}
+            objects={OCCLUDERS.filter(([, , , ls]) => ls.includes(k))
+              .map(([x, w, top, , soft]) => ({
+                light: CASTERS[k], x, y: GROUND, w, top, opacity: soft ?? 1,
+              }))}
+          />
+        ))}
       </g>
 
       {/* ═══ left flank: two sleeping houses, an old cherry, one lamp ═══ */}

@@ -1,3 +1,52 @@
+import type { Caster } from "@/lib/diner/scene";
+import CastShadows, { ShadowFilters } from "./CastShadow";
+
+/* ── the shop's own light, as a caster ──
+   Everything else on the street is lit by a bulb, which is a point, and a
+   point throws one shadow in one direction. The shop is not a bulb. It is a
+   lit window nearly four hundred units across and a lit door beside it, and an
+   extended source behaves differently in the one way that matters here:
+   **the shadow runs away from the part of the source the object is actually
+   in front of, not from the source's centre.**
+
+   Treat it as a point at the centre and a stool standing dead in front of the
+   window gets a shadow raking hard sideways, because the centre is two hundred
+   units away from it. What really happens is that the stool has that whole
+   window behind it, the light arrives from every part of it, and the shadow
+   goes straight out toward the road. So the ground point is the object's own
+   x, clamped to the lit openings — window and door — which puts the source
+   behind the object when it is in front of one and off to the side only when
+   it genuinely is.
+
+   That clamp is also why the shadows out here splay: they come off the two
+   openings' edges, so the bench past the door throws to the right, the board
+   past the window's left jamb throws to the left, and the two stools in front
+   of the glass throw straight at you. */
+const LIT_L = 316, LIT_R = 788;
+
+/** `y` is the source's height and `gy` how far behind the street line it sits;
+ *  both are smaller than the drawing's literal geometry, and deliberately.
+ *  The facade's light comes from *inside* the shop, through an opening — the
+ *  radiating surface is somewhere back in the room, not on the glass. Pinning
+ *  it to the glass gives the ground almost no depth to throw a shadow across
+ *  and every one of them comes out ten units long. */
+const shopLight = (bx: number): Caster => ({
+  x: 500, y: 330, gx: Math.min(LIT_R, Math.max(LIT_L, bx)), gy: 455, reach: 340, v: "",
+});
+
+/** What stands in front of the shop: `[x, w, top, base, cap, opacity]`.
+ *  `cap` is tighter here than on the street because the source is low and
+ *  these things are tall — a vending machine two-thirds the height of the
+ *  window would otherwise throw a shadow past the edge of the frame, which is
+ *  true and useless. */
+const FRONT: [number, number, number, number, number, number][] = [
+  [208, 84, 300, 518, 0.5, 1],      // the photo booth, beside the window
+  [302, 80, 398, 524, 0.5, 1.3],    // the specials board
+  [382, 52, 458, 518, 0.8, 1.3],    // stools: dead in front of the glass, so
+  [590, 52, 458, 518, 0.8, 1.3],    // these two throw straight at the viewer
+  [924, 104, 454, 518, 0.8, 1.2],   // the bench, lit past the door's jamb
+];
+
 /** The Systems Diner facade: building, noren, lanterns, vending machine.
  *  Auto-ported from the legacy build; geometry preserved 1:1. */
 export default function ShopFacade() {
@@ -45,6 +94,10 @@ export default function ShopFacade() {
                 <filter id="refB" x="-40%" y="-40%" width="180%" height="180%">
                   <feGaussianBlur stdDeviation="6"/>
                 </filter>
+                {/* 1000 units across where the street gives the shop 780, so
+                    the penumbra has to be scaled or these shadows come out
+                    softer than the street's by exactly that ratio */}
+                <ShadowFilters ns="d" scale={1 / 0.78} />
               </defs>
     
               {/* ===== the shop ===== */}
@@ -412,20 +465,23 @@ export default function ShopFacade() {
                 <ellipse cx="757" cy="532" rx="52" ry="20" fill="#ffcf9a" opacity=".05"/>
               </g>
 
+              {/* ── and what stands in the way of it ──
+                  After the spill and before the reflections, which is the
+                  order the light itself goes in: it arrives, some of it is
+                  blocked, and what is left comes back off the wet surface. */}
+              <CastShadows ns="d" v="" objects={FRONT.map(([x, w, top, base, cap, o]) => (
+                { light: shopLight(x), x, y: base, w, top, cap, opacity: o }
+              ))} />
+
               {/* what the street gives back */}
               <g mask="url(#refMask)">
-                {/* Under each object the road cannot reflect the shop, because
-                    the object is in the way — so the first thing a reflection
-                    puts down is *dark*. Without these the stools mirrored into
-                    a warm spill in almost their own colour and disappeared;
-                    what you actually see under a stool on a wet street is the
-                    hole it punches in the light. */}
-                <g fill="#0b0819" opacity=".72" filter="url(#refB)">
-                  <ellipse cx="382" cy="538" rx="34" ry="20"/>
-                  <ellipse cx="590" cy="538" rx="34" ry="20"/>
-                  <ellipse cx="302" cy="546" rx="50" ry="26"/>
-                  <ellipse cx="924" cy="536" rx="62" ry="19"/>
-                </g>
+                {/* There used to be four dark ellipses here, one under each
+                    object, standing in for "the road cannot reflect the shop
+                    where the object is in the way". That is a cast shadow, and
+                    there is now a real one doing exactly that job a few lines
+                    above — so this was the same darkness laid down twice, and
+                    two of them stacked is what turned the ground under the
+                    counter into one flat dark patch with an edge on it. */}
                 {/* the near furniture, mirrored about y=518 and squashed by k=.5 */}
                 <g transform="translate(0,777) scale(1,-.5)">
                   <g filter="url(#refN)" opacity=".85">

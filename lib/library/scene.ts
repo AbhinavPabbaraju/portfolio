@@ -30,10 +30,19 @@ export const ROOM = {
  *  over it. Four along each storey on the same rhythm, so the wall reads as
  *  one piece of joinery — what varies is the architecture between them. */
 export const BAY_W = 200;
-export const BAY_GAP = 20;
+/** The pier between two bookcases is not spacing, it is wall — and wall is
+ *  where a library hangs the things that are not books: the clock, the reading
+ *  poster, a framed print. At 20 it was too thin to carry any of them; the
+ *  clock alone is 30 across and sat overlapping the spines either side of it.
+ *  Wide enough for the widest thing that hangs on it, and no wider. */
+export const BAY_GAP = 42;
 export const BAY_X0 = 214;         // everything left of this is the staircase
 
 export const bayX = (slot: number) => BAY_X0 + slot * (BAY_W + BAY_GAP);
+
+/** The centre line of the pier *before* a bay. Everything mounted on a pier
+ *  is centred on this, so nothing has to know how wide the pier is. */
+export const pierX = (slot: number) => bayX(slot) - Math.round(BAY_GAP / 2);
 
 /** Where the room stops being shelves. The right-hand end carries the window,
  *  the way out, and the noticeboard nobody has cleared since term started. */
@@ -46,17 +55,25 @@ export const EAST = bayX(3) + BAY_W + BAY_GAP;
  *  front of a shelf lights the spines from the wrong side and its pool reads
  *  as a column of glowing books rather than as light in the room. */
 export const LAMPS = [
-  { x: bayX(0) - 14, y: 16, floor: "upper" as const },
-  { x: bayX(2) - 14, y: 16, floor: "upper" as const },
-  { x: bayX(1) - 14, y: 154, floor: "lower" as const },
-  { x: bayX(3) - 14, y: 154, floor: "lower" as const },
+  { x: pierX(0) - 5, y: 16, floor: "upper" as const },
+  { x: pierX(2) - 5, y: 16, floor: "upper" as const },
+  { x: pierX(1) - 5, y: 154, floor: "lower" as const },
+  { x: pierX(3) - 5, y: 154, floor: "lower" as const },
 ];
 
-/** Reading tables on the ground floor, with the rug each one stands on. */
+/** Reading tables on the ground floor, with the rug each one stands on.
+ *
+ *  Spread evenly along the shelf wall rather than aligned to the bays: a table
+ *  centred under every bookcase turns the room into a grid, and the reference
+ *  has the furniture on its own rhythm. `coat` is the reader's jacket — at
+ *  eleven pixels tall the colour is the only thing telling two people apart. */
+const tableAt = (sixth: number) =>
+  Math.round(BAY_X0 + ((bayX(3) + BAY_W - BAY_X0) * sixth) / 6) - 75;
+
 export const TABLES = [
-  { x: 250, w: 150, occupied: true },
-  { x: 560, w: 150, occupied: false },
-  { x: 870, w: 150, occupied: true },
+  { x: tableAt(1), w: 150, occupied: true, coat: "#33405e", hair: "#191413" },
+  { x: tableAt(3), w: 150, occupied: false, coat: "#3c2b33", hair: "#241b18" },
+  { x: tableAt(5), w: 150, occupied: true, coat: "#5a2a2c", hair: "#2b1d17" },
 ];
 
 /* ── the wall of books ──

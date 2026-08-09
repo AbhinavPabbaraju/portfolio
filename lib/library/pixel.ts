@@ -99,6 +99,16 @@ export const PAL = {
 
 export type PalKey = keyof typeof PAL;
 
+/** A darker or lighter cousin of a colour, for sprites whose palette is not
+ *  known until render — the readers, whose coats are the only thing telling
+ *  one from another. Two tones is all a sprite this size can carry; a third
+ *  step is a gradient, and there are no gradients here. */
+export const tone = (hex: string, f: number) =>
+  "#" + [1, 3, 5].map((i) =>
+    Math.min(255, Math.round(parseInt(hex.slice(i, i + 2), 16) * f))
+      .toString(16).padStart(2, "0")
+  ).join("");
+
 /** One run of identical pixels: a rect in logical space. */
 export interface Run {
   x: number; y: number; w: number; h: number; fill: string;

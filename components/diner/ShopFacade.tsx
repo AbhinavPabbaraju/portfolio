@@ -213,7 +213,11 @@ export default function ShopFacade() {
               <rect x="300" y="240" width="400" height="188" fill="none" stroke="#0e0b22" strokeWidth="9"/>
               <rect x="300" y="240" width="400" height="188" fill="none" stroke="#383468" strokeWidth="2"/>
     
-              {/* counter ledge + stools */}
+              {/* counter ledge + stools.
+                  Carries an id because the road gives it back: the wet-street
+                  block below `<use>`s this group rather than re-drawing it, so
+                  the reflection cannot drift from the thing reflected. */}
+              <g id="dfCounter">
               <rect x="288" y="426" width="424" height="24" rx="4" fill="url(#woodG)"/>
               <path d="M292,428 h416" stroke="#ffcd8c" strokeWidth="1.6" opacity=".35"/>
               <rect x="298" y="450" width="404" height="7" fill="#1a1310"/>
@@ -236,7 +240,8 @@ export default function ShopFacade() {
                 <line x1="604" y1="472" x2="610" y2="518" stroke="#1d1a3e" strokeWidth="4"/>
                 <line x1="590" y1="474" x2="590" y2="518" stroke="#181534" strokeWidth="4"/>
               </g>
-    
+              </g>
+
               {/* sliding door, lit from inside */}
               <g>
                 <rect x="716" y="268" width="82" height="252" fill="#191636" stroke="#2e4a60" strokeWidth="2"/>
@@ -284,8 +289,34 @@ export default function ShopFacade() {
                 <rect x="741" y="230" width="14" height="6" rx="2" fill="#241a12"/>
               </g>
     
+              {/* A bench outside, past the right-hand wall — where you wait
+                  when every stool at the counter is taken.
+
+                  It stands on the shop's own street line (y=518, the same line
+                  the stools' feet land on), which is the artwork's road: the
+                  shop is sized off the street's scale, so anything drawn in
+                  here at that line stands on the road at every window size.
+                  Slats with gaps rather than a solid plank — the gaps are what
+                  keep it from reading as a crate. */}
+              <g id="dfBench">
+                <rect x="884" y="454" width="6" height="44" rx="2" fill="#2f2216"/>
+                <rect x="958" y="454" width="6" height="44" rx="2" fill="#2f2216"/>
+                <rect x="878" y="458" width="92" height="7" rx="3" fill="url(#woodG)"/>
+                <rect x="878" y="458" width="92" height="1.6" fill="#ffcd8c" opacity=".22"/>
+                <rect x="878" y="472" width="92" height="7" rx="3" fill="url(#woodG)"/>
+                <rect x="872" y="488" width="104" height="8" rx="3" fill="url(#woodG)"/>
+                <rect x="872" y="488" width="104" height="2" fill="#ffcd8c" opacity=".3"/>
+                <rect x="876" y="498" width="96" height="4" rx="2" fill="#2a1d12"/>
+                <rect x="882" y="502" width="7" height="16" fill="#2f2216"/>
+                <rect x="959" y="502" width="7" height="16" fill="#2f2216"/>
+                <rect x="888" y="508" width="72" height="3.4" fill="#2a1d12"/>
+              </g>
+              {/* the contact shadow, outside the group: a shadow is not a thing
+                  the road reflects back */}
+              <ellipse cx="924" cy="518" rx="58" ry="4.5" fill="#050310" opacity=".5"/>
+
               {/* chalkboard, tonight's specials — leaning by the counter now */}
-              <g className="sway s3" style={{transformOrigin:'50% 100%'}}>
+              <g id="dfBoard" className="sway s3" style={{transformOrigin:'50% 100%'}}>
                 <rect x="262" y="398" width="80" height="100" rx="5" fill="#5a4a30"/>
                 <rect x="268" y="404" width="68" height="88" rx="3" fill="#14112a"/>
                 <g stroke="#cfd6e4" strokeWidth="1.8" fill="none" opacity=".7" strokeLinecap="round">
@@ -297,33 +328,166 @@ export default function ShopFacade() {
                 <line x1="332" y1="498" x2="340" y2="524" stroke="#3a2f1e" strokeWidth="4"/>
               </g>
     
-              {/* ===== wet street (surface provided by the shared street plane) ===== */}
-              {/* light spill from window + door */}
-              <polygon points="306,518 694,518 760,610 250,610" fill="#f2a656" opacity=".07"/>
-              <polygon points="716,518 798,518 850,610 700,610" fill="#d98a3f" opacity=".06"/>
-              {/* blurred reflections */}
-              <g filter="url(#refB)">
-                <rect x="316" y="524" width="368" height="66" fill="url(#winWarm)" opacity=".16"/>
-                <rect x="726" y="524" width="62" height="52" fill="#d98a3f" opacity=".14"/>
-                <circle cx="262" cy="546" r="20" fill="#f28a2e" opacity=".14"/>
-                <circle cx="748" cy="540" r="17" fill="#f28a2e" opacity=".12"/>
-                <rect x="812" y="524" width="40" height="58" fill="#8fbcd4" opacity=".1"/>
-                <rect x="380" y="524" width="240" height="40" fill="#ff8fcb" opacity=".05"/>
-                <rect x="170" y="524" width="76" height="46" fill="#8fbcd4" opacity=".08"/>
+              {/* ===== wet street (surface provided by the shared street plane) =====
+
+                  ── how a reflection is built here ──
+                  The road is a mirror seen almost edge-on. An object standing
+                  `h` above the street line comes back `k·h` below it, flipped,
+                  where `k` is the squash the viewing angle imposes — so every
+                  reflection below is the *same drawing* under one transform,
+                  `scale(1,-k)` about y=518, and not a shape that approximates
+                  it. `<use>` rather than a redraw for exactly that reason: a
+                  hand-placed smear under the stools is wrong the moment a stool
+                  moves, and this one cannot be.
+
+                  Two things stop it looking like a mirror in a bathroom.
+                  Distance: the mask fades the whole set out as it comes toward
+                  the viewer, because scattering eats a reflection long before
+                  the surface runs out. And ripples: the black bars in the same
+                  mask cut it into bands. Water is a broken mirror, and the
+                  breaks are most of what says "wet" — an unbroken reflection
+                  reads as polished floor, which is the other way this scene
+                  can go wrong. */}
+              <defs>
+                <linearGradient id="refFade" x1="0" y1="518" x2="0" y2="616" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#fff" stopOpacity=".95"/>
+                  <stop offset=".38" stopColor="#fff" stopOpacity=".5"/>
+                  <stop offset=".72" stopColor="#fff" stopOpacity=".16"/>
+                  <stop offset="1" stopColor="#fff" stopOpacity="0"/>
+                </linearGradient>
+                <mask id="refMask" maskUnits="userSpaceOnUse" x="0" y="516" width="1000" height="104">
+                  <rect x="0" y="516" width="1000" height="104" fill="url(#refFade)"/>
+                  {/* the ripples. Wider and further apart as they come forward,
+                      which is the same foreshortening the road itself has */}
+                  <g fill="#000">
+                    <rect x="0" y="524.5" width="1000" height="1.6" opacity=".8"/>
+                    <rect x="0" y="531" width="1000" height="2" opacity=".7"/>
+                    <rect x="0" y="540" width="1000" height="2.4" opacity=".85"/>
+                    <rect x="0" y="551" width="1000" height="2" opacity=".6"/>
+                    <rect x="0" y="562" width="1000" height="3.2" opacity=".8"/>
+                    <rect x="0" y="576" width="1000" height="2.6" opacity=".65"/>
+                    <rect x="0" y="591" width="1000" height="4" opacity=".8"/>
+                  </g>
+                </mask>
+                <filter id="refN" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="2.6"/>
+                </filter>
+                <filter id="spillB" x="-40%" y="-40%" width="180%" height="180%">
+                  <feGaussianBlur stdDeviation="18"/>
+                </filter>
+                <linearGradient id="strkG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#ffe7c4" stopOpacity=".42"/>
+                  <stop offset=".45" stopColor="#ffd9a0" stopOpacity=".17"/>
+                  <stop offset="1" stopColor="#ffb56b" stopOpacity="0"/>
+                </linearGradient>
+                <linearGradient id="strkC" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0" stopColor="#8fbcd4" stopOpacity=".34"/>
+                  <stop offset="1" stopColor="#8fbcd4" stopOpacity="0"/>
+                </linearGradient>
+                {/* The spill has to be *gone* before y=620, not merely faint:
+                    620 is the bottom of this SVG's viewBox and it clips, so a
+                    flat wash blurred across it gets its tail cut off and the
+                    road drops a step in brightness along a line only the markup
+                    knows about. The near road past that line belongs to the
+                    backdrop plane, which picks the light up and carries it on. */}
+                <linearGradient id="spillG" x1="0" y1="518" x2="0" y2="612" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#f2a656" stopOpacity=".13"/>
+                  <stop offset=".5" stopColor="#f2a656" stopOpacity=".075"/>
+                  <stop offset="1" stopColor="#f2a656" stopOpacity="0"/>
+                </linearGradient>
+                <linearGradient id="spillD" x1="0" y1="518" x2="0" y2="612" gradientUnits="userSpaceOnUse">
+                  <stop offset="0" stopColor="#d98a3f" stopOpacity=".11"/>
+                  <stop offset=".5" stopColor="#d98a3f" stopOpacity=".06"/>
+                  <stop offset="1" stopColor="#d98a3f" stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+
+              {/* the spill. Blurred, because light on a surface has no edge —
+                  drawn hard, the two straight diagonals running out of the shop
+                  read as a paper cut-out lying in the road. */}
+              <g filter="url(#spillB)">
+                <polygon points="306,518 694,518 772,612 236,612" fill="url(#spillG)"/>
+                <polygon points="716,518 798,518 858,612 692,612" fill="url(#spillD)"/>
+                <ellipse cx="500" cy="534" rx="215" ry="26" fill="#ffcf9a" opacity=".08"/>
+                <ellipse cx="757" cy="532" rx="52" ry="20" fill="#ffcf9a" opacity=".05"/>
               </g>
-              <g opacity=".55">
-                <rect x="352" y="528" width="2.5" height="52" fill="#ffd9a0" opacity=".28"/>
-                <rect x="452" y="530" width="2" height="64" fill="#ffe7c4" opacity=".22"/>
-                <rect x="548" y="526" width="2.5" height="46" fill="#ffd9a0" opacity=".26"/>
-                <rect x="642" y="530" width="2" height="58" fill="#ffcf9a" opacity=".2"/>
-                <rect x="830" y="526" width="2" height="44" fill="#8fbcd4" opacity=".26"/>
-                <rect x="756" y="528" width="2" height="40" fill="#ffb56b" opacity=".22"/>
+
+              {/* what the street gives back */}
+              <g mask="url(#refMask)">
+                {/* Under each object the road cannot reflect the shop, because
+                    the object is in the way — so the first thing a reflection
+                    puts down is *dark*. Without these the stools mirrored into
+                    a warm spill in almost their own colour and disappeared;
+                    what you actually see under a stool on a wet street is the
+                    hole it punches in the light. */}
+                <g fill="#0b0819" opacity=".72" filter="url(#refB)">
+                  <ellipse cx="382" cy="538" rx="34" ry="20"/>
+                  <ellipse cx="590" cy="538" rx="34" ry="20"/>
+                  <ellipse cx="302" cy="546" rx="50" ry="26"/>
+                  <ellipse cx="924" cy="536" rx="62" ry="19"/>
+                </g>
+                {/* the near furniture, mirrored about y=518 and squashed by k=.5 */}
+                <g transform="translate(0,777) scale(1,-.5)">
+                  <g filter="url(#refN)" opacity=".85">
+                    <use href="#dfCounter"/>
+                    <use href="#dfBench"/>
+                    <use href="#dfBoard"/>
+                  </g>
+                </g>
+                {/* the lit window and door, which are too tall to mirror inside
+                    the frame — past the counter their reflection is all
+                    scattering anyway, so it comes back as light rather than as
+                    a picture of a window */}
+                <g filter="url(#refB)">
+                  <rect x="316" y="520" width="368" height="72" fill="url(#winWarm)" opacity=".2"/>
+                  <rect x="726" y="520" width="62" height="58" fill="#d98a3f" opacity=".16"/>
+                  <rect x="812" y="520" width="40" height="60" fill="#8fbcd4" opacity=".11"/>
+                  <rect x="170" y="520" width="76" height="50" fill="#8fbcd4" opacity=".09"/>
+                  <rect x="380" y="520" width="240" height="42" fill="#ff8fcb" opacity=".05"/>
+                  {/* the two lanterns, far enough up that only their glow
+                      survives the trip down */}
+                  <circle cx="262" cy="548" r="21" fill="#f28a2e" opacity=".16"/>
+                  <circle cx="748" cy="542" r="18" fill="#f28a2e" opacity=".13"/>
+                </g>
               </g>
-              <ellipse cx="380" cy="588" rx="66" ry="8" fill="#5b93b3" opacity=".05"/>
-              <path d="M318,585 a64,8 0 0 1 124,0" fill="none" stroke="#8fbcd4" strokeWidth="1.2" opacity=".22"/>
-              <ellipse cx="646" cy="602" rx="88" ry="9" fill="#ff8fcb" opacity=".04"/>
-              <path d="M562,600 a86,9 0 0 1 168,0" fill="none" stroke="#ff8fcb" strokeWidth="1.2" opacity=".18"/>
-    
+
+              {/* Vertical smears, each one under something that is actually
+                  lit: the window's four mullions, the door, the neon box, the
+                  bench's seat edge. A streak with nothing above it is the
+                  detail that gives a fake reflection away.
+
+                  Deliberately *outside* the ripple mask and blurred wide. Thin,
+                  hard streaks cut by the same horizontal bars came out as
+                  dotted lines — a barcode painted on the road rather than
+                  light running down it. A smear this soft carries the break in
+                  its own falloff and does not need cutting. */}
+              <g filter="url(#refN)">
+                <rect x="348" y="519" width="6" height="62" fill="url(#strkG)"/>
+                <rect x="448" y="519" width="5" height="74" fill="url(#strkG)"/>
+                <rect x="545" y="519" width="6" height="56" fill="url(#strkG)"/>
+                <rect x="639" y="519" width="5" height="68" fill="url(#strkG)"/>
+                <rect x="753" y="519" width="5" height="50" fill="url(#strkG)"/>
+                <rect x="828" y="519" width="5" height="52" fill="url(#strkC)"/>
+                <rect x="898" y="519" width="4" height="34" fill="url(#strkG)" opacity=".55"/>
+                <rect x="946" y="519" width="4" height="30" fill="url(#strkG)" opacity=".45"/>
+              </g>
+
+              {/* Standing water. A puddle is a hole in the road that shows what
+                  is above it, so each one takes the warm of the shop and gets a
+                  bright rim only on the side the light comes from. */}
+              <g>
+                <path d="M296,578 C338,568 402,570 436,580 C462,588 424,598 372,598 C316,598 276,586 296,578 Z"
+                      fill="#f2a656" opacity=".07"/>
+                <path d="M302,576 C342,568 396,570 428,578" fill="none" stroke="#ffcf9a" strokeWidth="1.4" opacity=".2"/>
+                <ellipse cx="366" cy="584" rx="12" ry="9" fill="#ffe7c4" opacity=".1" filter="url(#refN)"/>
+                <path d="M566,600 C612,590 682,592 720,603 C748,612 704,622 646,622 C584,622 544,608 566,600 Z"
+                      fill="#f2a656" opacity=".055"/>
+                <path d="M572,598 C616,590 674,592 710,601" fill="none" stroke="#ffcf9a" strokeWidth="1.3" opacity=".16"/>
+                <path d="M846,566 C874,560 916,561 938,568 C954,574 928,582 890,582 C852,582 832,571 846,566 Z"
+                      fill="#f2a656" opacity=".05"/>
+                <path d="M851,565 C876,559 912,560 932,566" fill="none" stroke="#ffcf9a" strokeWidth="1.2" opacity=".15"/>
+              </g>
+
               {/* street vent steam, stage right */}
               <g>
                 <rect x="826" y="506" width="34" height="12" rx="2" fill="#171434" stroke="#292546" strokeWidth="1.4"/>

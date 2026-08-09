@@ -656,6 +656,22 @@ export default function Backdrop() {
             below that, and the gap read as the light switching off. */}
         <ellipse cx="800" cy={GROUND + 8} rx="330" ry="70" fill="#f2a656" opacity=".07" filter="url(#nblur)" />
         <ellipse cx="800" cy={GROUND + 64} rx="220" ry="52" fill="#ffcf9a" opacity=".045" filter="url(#nblur)" />
+        {/* The facade draws its own reflections, but its frame stops 80 units
+            short of the bottom of the grid — so the last stretch of road in
+            front of the shop, the part nearest the viewer, is this plane's to
+            light. Without it the whole business of the wet street ends on a
+            horizontal line that only the markup knows about.
+
+            Ripple crests, not bars: an ellipse tapers at both ends, and a
+            rectangle lying in the road is a rectangle lying in the road. They
+            lengthen and thicken as they come forward, on the same
+            foreshortening as the centre line. */}
+        <ellipse cx="800" cy={GROUND + 106} rx="252" ry="46" fill="#f2a656" opacity=".035" filter="url(#nblur)" />
+        <g fill="#ffcf9a" opacity=".055">
+          <ellipse cx="800" cy={GROUND + 88} rx="228" ry="1.8" />
+          <ellipse cx="792" cy={GROUND + 101} rx="188" ry="2.4" />
+          <ellipse cx="808" cy={GROUND + 117} rx="268" ry="3" />
+        </g>
 
         {/* neon coming back off the water. The shop's own spill is drawn by
             the facade; these are the city's, and they stop short of the

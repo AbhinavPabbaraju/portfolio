@@ -65,7 +65,10 @@ export const PAL = {
   m: "#6d5a3a", // sand
   n: "#43304a", // plum
   o: "#5c4160", // violet
-  /* the lit spine — a real link, catching lamp light */
+  /* the lit spines — a real link, catching lamp light. `p` is the gilt cloth
+     the whole wall used to be bound in; the rest of the bindings live with the
+     uppercase keys below, and `LIT_COLOURS` is the rotation. `q` is the gilt
+     itself: the bands and the lettering, on every binding. */
   p: "#c8a44e",
   q: "#e8cf8a",
   /* paper, signage, glass */
@@ -95,9 +98,32 @@ export const PAL = {
   J: "#241a14", // under-stair dark
   K: "#9a7a4e", // brass
   L: "#e6e0cc", // paper
+  /* ── the rest of the lit bindings ──
+     One saturated cousin per muted family in the lowercase spine block, at
+     roughly twice its lightness. That gap is the whole job: a linked book has
+     to lift off the wall it is standing in, from across the room, at three
+     logical pixels wide. Several are the site's own tokens — `--shu`,
+     `--accent`, `--ember` — so the room is bound in the same inks as the
+     page it sits in. */
+  M: "#b8492f", // vermilion   — the lit cousin of f/g
+  N: "#5b93b3", // steel blue  — h/i
+  O: "#6ea45a", // leaf        — j/k
+  P: "#9a6bb0", // violet      — n/o
+  Q: "#3d9b8a", // teal
+  R: "#c4693c", // ember
+  S: "#bf5a70", // rose
 } as const;
 
 export type PalKey = keyof typeof PAL;
+
+/** The bindings a linked spine can be bound in, in rotation order.
+ *
+ *  Every link on the wall used to be `p`, and a shelf of identical gold
+ *  spines reads as a row of bookmarks somebody has left in a book rather than
+ *  as books. What marks a spine as pullable is the gilt band across it, not
+ *  its colour — so the colour is free to vary, and varying it is what makes
+ *  the wall look like a library instead of a menu. */
+export const LIT_COLOURS = ["p", "M", "N", "O", "P", "Q", "R", "S"] as const;
 
 /** A darker or lighter cousin of a colour, for sprites whose palette is not
  *  known until render — the readers, whose coats are the only thing telling

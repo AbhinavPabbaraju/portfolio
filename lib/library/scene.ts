@@ -1,5 +1,5 @@
-import { LOGICAL_H, LOGICAL_W } from "./pixel";
-import type { Book } from "@/lib/data/library";
+import { LIT_COLOURS, LOGICAL_H, LOGICAL_W } from "./pixel";
+import { ALL_BOOKS, type Book } from "@/lib/data/library";
 
 /** The room, in logical pixels. Every number here is an integer because
  *  every number here is a pixel — see `pixel.ts` for why that matters.
@@ -88,6 +88,21 @@ export const TABLES = [
 
 const FILLER_COLOURS = ["f", "g", "h", "i", "j", "k", "l", "m", "n", "o"];
 
+/* ── what colour a link is bound in ──
+   Handed out in wall order, so the rotation carries across bay boundaries and
+   the whole room gets an even spread rather than each bookcase repeating the
+   same short cycle. `byRow` deals books round-robin down five shelves, so two
+   books sharing a shelf are five apart in this rotation — and 5 and 8 are
+   coprime, so a shelf never shows one binding twice.
+
+   Keyed off the book object rather than its index within a row: a row's
+   contents depend on how many shelves the bay has, and a spine that changed
+   colour when the room reflowed would be a different book to look at. */
+const BINDING = new Map<Book, string>(
+  ALL_BOOKS.map((b, i) => [b, LIT_COLOURS[i % LIT_COLOURS.length]]),
+);
+const binding = (b: Book) => BINDING.get(b) ?? LIT_COLOURS[0];
+
 export interface Spine {
   x: number;          // left edge, within the bay's interior
   w: number;
@@ -126,15 +141,43 @@ export function shelfRow(width: number, seed: number, books: Book[], rowH: numbe
   }
 
   if (books.length && spines.length) {
+    /* Books go in at evenly spaced slots, nudged off those slots by the row's
+       own seed, then to the nearest free standing spine either side. Every
+       part of that is load-bearing:
+
+       — even spacing alone put the links of all five shelves at the same few
+         indices, and since every row is the same width with the same spine
+         widths, the same indices are the same x. The bay came out with two
+         lit columns running floor to ceiling, which reads as architecture,
+         not as books somebody shelved.
+       — the nudge is drawn from `rnd()`, so it differs per row (the seed is
+         `slot` and `r`) and per book, and stays identical between server and
+         client. Half a step either way is enough to break the columns and
+         small enough that the row is still evenly covered.
+       — the nearest-free walk matters twice: the old version returned early
+         when a slot landed on the flat stack, and overwrote itself when two
+         books rounded to one index. Either way a link vanished off the wall
+         with nothing to click and nothing in the tab order. */
     const step = spines.length / (books.length + 1);
+    const taken = new Set<number>();
     books.forEach((b, i) => {
-      const idx = Math.min(spines.length - 1, Math.round(step * (i + 1)));
-      if (spines[idx].flat) return;
+      const at = step * (i + 1) + (rnd() - 0.5) * step;
+      const ideal = Math.max(0, Math.min(spines.length - 1, Math.round(at)));
+      let idx = -1;
+      for (let d = 0; d < spines.length && idx < 0; d++) {
+        for (const c of d === 0 ? [ideal] : [ideal - d, ideal + d]) {
+          if (c < 0 || c >= spines.length || spines[c].flat || taken.has(c)) continue;
+          idx = c;
+          break;
+        }
+      }
+      if (idx < 0) return;                       // a row of nothing but stack
+      taken.add(idx);
       spines[idx] = {
         ...spines[idx],
         w: 4 + (b.weight ?? 2) * 2,
         h: rowH - 2,
-        colour: "p",
+        colour: binding(b),
         book: b,
       };
     });

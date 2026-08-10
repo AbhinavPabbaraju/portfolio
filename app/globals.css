@@ -615,7 +615,11 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
    than the viewport with its *bottom* against the bottom of the screen — so
    at rest the visible window is exactly this frame, and the head above it has
    scrolled away. That only holds with no padding under it. */
-.cafe{padding-bottom:0}
+/* `section.` for the same specificity reason as `.library` above: a bare
+   `.cafe` never beat `section.block`, so the padding this line exists to
+   remove was still there and the exterior rested a padding's worth off the
+   bottom of the screen. */
+section.cafe{padding-bottom:0}
 /* The top margin is what lets the shop stand ON the street rather than above
    it. The scene is full-bleed, so its scale is fixed by the viewport width;
    pinning its ground line (viewBox y=740) to the shop's own street line means
@@ -659,10 +663,11 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
   font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;color:var(--dim);z-index:3}
 
 /* --- the rain has a sound, and a way to turn it off ---
-   Parked in `section.block`'s own bottom padding rather than inside
-   `.cafe-exterior`: that keeps it clear of `.alley-link` in the corner above,
-   and keeps it on screen through the menu and the photo machine, which is
-   where the exterior goes `hidden`. Ambient audio that starts on its own has
+   Positioned against `.cafe` rather than inside `.cafe-exterior`: that keeps
+   it on screen through the menu and the photo machine, which is where the
+   exterior goes `hidden`. It used to land in `section.block`'s bottom padding;
+   with that padding gone it sits over the road itself, bottom-left, which is
+   the far corner from `.alley-link`. Ambient audio that starts on its own has
    to carry its own stop control (WCAG 1.4.2) — this is it. */
 .rain-audio{position:absolute;left:calc(50% - 50vw + var(--pad));bottom:clamp(22px,3vw,42px);z-index:4;
   display:flex;align-items:center;gap:12px}
@@ -1059,7 +1064,13 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
    block exists to keep logical pixels landing on whole device pixels — see
    `lib/library/pixel.ts`. The room's width and height are set in JS to an
    exact integer multiple of its logical size; CSS must not stretch it. */
-.library{padding:0;position:relative}
+/* `section.` on purpose: `section.block{padding:clamp(66px,11vh,132px) 0}` is
+   one element + one class, so a bare `.library` loses to it on specificity no
+   matter where it sits in the file. With that padding on, `#writing` was ~130px
+   taller than a viewport, `restPoint()` in CinemaDeck therefore rested it
+   `bottom bottom`, and the room locked with its top cropped above the screen
+   and a band of section padding below it — the "slides under, then locks". */
+section.library{padding:0;position:relative}
 .lib-frame{position:relative;width:100vw;margin-left:calc(50% - 50vw);
   height:100svh;overflow:clip;background:#0b0908}
 .lib-room{position:absolute;left:0;top:0;max-width:none;will-change:transform;

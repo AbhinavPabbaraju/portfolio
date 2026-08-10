@@ -219,7 +219,9 @@ preserve-the-design-first, migrate selectors to utilities gradually.
 - The diner section is head + one viewport, and `CinemaDeck` rests anything
   taller than the viewport with its *bottom* on the bottom of the screen — so
   at rest the visible window is exactly the frame and the section head has
-  scrolled away. That only holds while `.cafe{padding-bottom:0}`.
+  scrolled away. That only holds while `section.cafe{padding-bottom:0}` — and
+  it has to be `section.cafe`, not `.cafe`: `section.block` sets the padding
+  and a bare class never outranks it. Same for `section.library`.
 - On a phone the grid is cropped so hard that a shop scaled off it would be
   wider than the window, so `sync()` floors the shop at the gutter. The poles
   are outside the crop by then; the cables still cross the sky, arriving from

@@ -1,4 +1,4 @@
-# Abhinav Pabbaraju — portfolio
+# Abhinav Pabbaraju — Portfolio
 
 Production-grade Next.js migration of the single-file portfolio. One continuous
 scroll-driven world: hero → about → showcase → Systems Diner → writing → contact.

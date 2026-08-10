@@ -5,6 +5,7 @@ import { textArt, textW } from "@/lib/library/font";
 import { LOGICAL_H, LOGICAL_W } from "@/lib/library/pixel";
 import Px, { Box } from "@/components/library/Px";
 import Room from "@/components/library/Room";
+import { refreshDeck } from "@/lib/lenis";
 
 /** Break a title into lines that fit the plaque, on word boundaries. */
 function wrap(str: string, max: number): string[] {
@@ -62,6 +63,11 @@ export default function Library() {
   }, []);
 
   useEffect(() => {
+    /* The room's width changes in whole steps, and the deck's walk along the
+       wall is measured from it. A step therefore is a layout mutation and has
+       to refresh the deck, or the walk keeps travelling the distance measured
+       for the previous scale. */
+    let lastScale = 0;
     const fit = () => {
       const f = frame.current, r = room.current;
       if (!f || !r) return;
@@ -79,6 +85,14 @@ export default function Library() {
          tall and the viewport is not, so a sliver goes at each end rather
          than all of it off the top */
       r.style.top = Math.round((h - LOGICAL_H * scale) / 2) + "px";
+      if (scale !== lastScale) {
+        const first = lastScale === 0;
+        lastScale = scale;
+        /* next frame, so this never re-enters a refresh that is already
+           running (a refresh resizes nothing, but ResizeObserver can fire
+           inside one) */
+        if (!first) requestAnimationFrame(refreshDeck);
+      }
     };
     fit();
     const ro = new ResizeObserver(fit);

@@ -54,6 +54,25 @@ export default function CinemaDeck() {
       /** How far a departing scene fades before it is fully hidden. */
       const DIM = 0.55;
 
+      /* ── the walk along the library wall ──
+         The room is wider than the screen and the dwell is where you cross it.
+         It rides the library's own pin timeline rather than a second
+         ScrollTrigger, for two reasons. The panned room lives *inside* the
+         pinned section, so a separate trigger measures its start against an
+         element another trigger is pinning and the two can disagree by a pixel;
+         and on one timeline the walk is smoothed by exactly the scrub the
+         scene around it is smoothed by, which is the one-vocabulary rule.
+
+         Travel is read from the room's own `width` attribute, which `fit()`
+         writes in whole logical pixels. `getBoundingClientRect()` cannot be
+         used here: `#writing` carries this deck's arrival (0.97) and departure
+         (0.94) scale, so a measured rect reports the room several per cent
+         narrower than it is and the walk stops short of the far wall. */
+      const libRoom = document.querySelector<SVGSVGElement>(".lib-room");
+      const libFrame = document.querySelector<HTMLElement>(".lib-frame");
+      const libTravel = () =>
+        libRoom && libFrame ? -Math.max(0, libRoom.width.baseVal.value - libFrame.clientWidth) : 0;
+
       /** Where a scene comes to rest.
        *
        *  Every scene is at least `100svh`, so one that is exactly that
@@ -100,14 +119,21 @@ export default function CinemaDeck() {
           },
           hold);
 
-        /* the hero's name pulls apart as it is covered, not while it holds */
+        /* the room crosses the wall over the whole dwell, then holds still
+           while the scene recedes — one timeline, so it cannot drift from the
+           pin and it shares the pin's scrub */
+        if (sel === "#writing" && libRoom) {
+          tl.fromTo(libRoom, { x: 0 }, { x: libTravel, ease: "none", duration: hold }, 0);
+        }
+
+        /* the hero's name pulls apart as it is covered, not while it holds.
+           The target is the wordmark host, not `h1.name .row`: once
+           `AsciiGlitchName` builds, the name is a canvas inside that host and
+           the fallback rows are clipped to 1×1 — tweening them moved nothing
+           anybody could see. */
         if (sel === ".hero") {
-          el.querySelectorAll<HTMLElement>("h1.name .row").forEach((row, i) => {
-            tl.to(row, {
-              y: -(16 + i * 12) + "vh", x: (i % 2 ? 4 : -4) + "vw",
-              ease: "none", duration: 1,
-            }, hold);
-          });
+          const name = el.querySelector<HTMLElement>("h1.name .ascii-name-host") ?? el.querySelector<HTMLElement>("h1.name");
+          if (name) tl.to(name, { y: "-18vh", x: "-3vw", ease: "none", duration: 1 }, hold);
         }
 
         ScrollTrigger.create({
@@ -188,10 +214,9 @@ export default function CinemaDeck() {
       fly("#work .block-head h2", { y: [14, -10], x: [-5, 4] });
       fly("#work .block-head .section-num", { y: [5, -13] });
       fly("#work .cafe-cap", { y: [8, -4], trail: true });
-      fly("#writing .block-head h2", { y: [14, -10], x: [6, -4] });
-      fly("#writing .note", (i) => ({
-        y: [9 + i * 4, -(5 + i * 3)], x: [i % 2 ? 3 : -3, i % 2 ? -2 : 2],
-      }));
+      /* dead selectors removed: `#writing` is the pixel library and has no
+         `.block-head` or `.note` — those flies were left over from the old
+         text-based writing section and animated nothing. */
       fly("#now .block-head", { y: [12, -9] });
       fly("#contact h2", { y: [15, -9], x: [-3, 2] });
       fly("#contact .sub", { y: [10, -5], trail: true });
@@ -221,35 +246,7 @@ export default function CinemaDeck() {
         onUpdate: (self) => { showcase.scrollRot = (1 - self.progress) * 0.85; },
       });
 
-      /* ── the walk along the library wall ──
-         The room is wider than the screen, and the dwell is where you cross
-         it: scroll maps to travel along the wall, so the scene holds still in
-         the deck's terms while the camera tracks sideways. Same device as the
-         carousel's unroll — the hold is real document distance and this is
-         what spends it.
-
-         Travel is a function, not a number: it depends on the room's rendered
-         width, which is an integer multiple of a logical size and therefore
-         changes in steps as the viewport does. `invalidateOnRefresh` re-reads
-         it rather than latching the value measured at build. */
-      const libRoom = document.querySelector<SVGSVGElement>(".lib-room");
-      const libFrame = document.querySelector<HTMLElement>(".lib-frame");
-      if (libRoom && libFrame) {
-        const libHold = (() => {
-          const spacer = document.querySelector("#writing")?.nextElementSibling;
-          return spacer?.classList.contains("cine-hold")
-            ? (spacer as HTMLElement).offsetHeight / window.innerHeight : 1;
-        })();
-        gsap.fromTo(libRoom, { x: 0 }, {
-          x: () => -Math.max(0, libRoom.getBoundingClientRect().width - libFrame.clientWidth),
-          ease: "none", duration: libHold,
-          scrollTrigger: {
-            trigger: "#writing", start: "bottom bottom",
-            end: () => "+=" + window.innerHeight * libHold,
-            scrub: SCRUB.lead, invalidateOnRefresh: true,
-          },
-        });
-      }
+      /* the library's walk rides its own pin timeline above — see `libTravel`. */
 
       /* ── the diner street settles into place ──
          A dolly, not a slide. Both scene planes are `slice` over a frame they

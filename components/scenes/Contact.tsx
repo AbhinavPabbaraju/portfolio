@@ -3,7 +3,6 @@ import { useEffect, useRef } from "react";
 import RotatingWord from "@/components/ui/RotatingWord";
 import GhostPill from "@/components/ui/GhostPill";
 import Footer from "@/components/chrome/Footer";
-import FluidGlass from "@/components/ui/FluidGlass";
 
 /** donut.c, but it's my website — spinning live, zero images, all math. */
 function useDonut(ref: React.RefObject<HTMLPreElement | null>) {
@@ -85,7 +84,13 @@ export default function Contact() {
           <GhostPill href="https://github.com/AbhinavPabbaraju" target="_blank" rel="noopener noreferrer">GitHub ↗</GhostPill>
           <GhostPill href="https://www.linkedin.com/in/abhinav-pabbaraju" target="_blank" rel="noopener noreferrer">LinkedIn ↗</GhostPill>
         </div>
-        <FluidGlass />
+        {/* The transmissive glass band used to sit here, between the CTAs and
+            the donut. Two showpieces stacked under the one thing this section
+            exists to do pushed the headline and the email button off the top
+            of the screen — and its in-canvas type read "SAY HELLO ↗", which is
+            what the buttons above it already say. It was also the most
+            expensive thing on the page: transmission re-renders the scene to
+            an offscreen buffer every frame. */}
         <pre className="ascii donut" ref={donut} aria-hidden />
         <div className="ascii-cap">^ donut.c, but it’s my website — spinning live, zero images, all math</div>
       </div>

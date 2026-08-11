@@ -206,9 +206,14 @@ export default function CinemaDeck() {
         });
       };
 
+      fly("#about .block-head", { y: [12, -9] });
       fly("#about .about-lead", { y: [16, -12], x: [-3, 2] });
       fly("#about .about-body", { y: [22, -8], trail: true });
-      fly("#about .facts", { y: [10, -5], trail: true });
+      /* lead scrub, not trail: the fact table stacks directly under
+         `.about-lead` now, and two elements that touch have to travel on the
+         same clock or the difference reads as jitter rather than depth. The
+         shorter distance is the parallax. */
+      fly("#about .facts", { y: [10, -5] });
       fly("#about .stackloop", { y: [12, -6], x: [3, -3], trail: true });
       fly("#showcase .sc-head .section-num", { y: [8, -14], x: [4, -3] });
       fly("#work .block-head h2", { y: [14, -10], x: [-5, 4] });

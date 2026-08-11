@@ -239,6 +239,14 @@ section.block{padding:clamp(66px,11vh,132px) 0;position:relative}
 .block-head h2{font-family:var(--f-display);font-weight:700;letter-spacing:-.024em;font-size:clamp(1.8rem,4.5vw,3rem);line-height:.98;max-width:16ch}
 
 /* ============================================================ ABOUT */
+/* Same story as `#now` further down, and the same fix: the scene is shorter
+   than the `100svh` box it is pinned in, so its content sat against the top
+   with every bit of the slack below it. `margin-block:auto` for the reason
+   given there — auto margins collapse to zero once the content outgrows the
+   box, so the heading can never end up above the top edge. */
+#about{display:flex;flex-direction:column}
+#about > .wrap{margin-block:auto}
+
 .about-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(30px,6vw,90px);align-items:start}
 .about-lead{font-family:var(--f-display);font-weight:400;font-size:clamp(1.3rem,3vw,2rem);line-height:1.35;letter-spacing:-.01em}
 .about-lead b{color:var(--accent-2);font-weight:500}
@@ -1122,15 +1130,25 @@ section.library{padding:0;position:relative}
 #now{display:flex;flex-direction:column}
 #now > .wrap{margin-block:auto}
 
-.now-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2)}
-.now-card{position:relative;border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s-2);background:linear-gradient(180deg,var(--surface),var(--bg-2));transition:border-color var(--dur-sm) var(--ease),transform var(--dur-sm) var(--ease)}
+.now-grid{margin-top:var(--s-3);display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s-2)}
+/* flex column so the three cards, which are equal height as grid items, can
+   push their `golink` to a shared baseline instead of leaving it wherever the
+   paragraph happened to end */
+.now-card{position:relative;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:var(--r-lg);padding:var(--s-2);background:linear-gradient(180deg,var(--surface),var(--bg-2));transition:border-color var(--dur-sm) var(--ease),transform var(--dur-sm) var(--ease)}
 .now-card:hover{border-color:var(--line-2);transform:translateY(-3px)}
 .now-card .stat{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--live);display:flex;align-items:center;gap:8px;margin-bottom:18px}
 .now-card .stat .dot{width:6px;height:6px;border-radius:50%;background:var(--live);box-shadow:0 0 7px var(--live)}
-.now-card h4{font-family:var(--f-display);font-size:1.25rem;font-weight:600;letter-spacing:-.015em;margin-bottom:10px}
-.now-card p{color:var(--muted);font-size:.92rem;line-height:1.55}
-.now-card a.golink{margin-top:16px;display:inline-flex;gap:7px;font-family:var(--f-mono);font-size:11.5px;color:var(--accent-2)}
-@media(max-width:768px){.now-grid{grid-template-columns:1fr}}
+/* `h3`, not `h4`: the card sits under the section's own `h2` and the markup
+   has always said `h3`. Styling `h4` here matched nothing, so card titles fell
+   back to the UA's bold — body face, wrong size — which is the silent kind of
+   type regression, not a visible one. */
+.now-card h3{font-family:var(--f-display);font-size:1.25rem;font-weight:600;letter-spacing:-.015em;margin-bottom:10px}
+.now-card p{flex:1;color:var(--muted);font-size:.92rem;line-height:1.55}
+.now-card a.golink{margin-top:16px;align-self:flex-start;display:inline-flex;gap:7px;font-family:var(--f-mono);font-size:11.5px;color:var(--accent-2)}
+/* 992, not 768: this is a wide side-by-side composition and collapses on the
+   same threshold as the others. Three across a 940px wrap is already ~285px a
+   card, and below that there is not room for a title and a sentence. */
+@media(max-width:992px){.now-grid{grid-template-columns:1fr}}
 
 /* ============================================================ CONTACT / FOOTER */
 .contact{padding:clamp(80px,14vh,180px) 0 0}
@@ -1363,19 +1381,12 @@ h1.name.asciified canvas{image-rendering:pixelated}
 .cn-card a:hover,.cn-card a:focus-visible{color:var(--accent-2)}
 @media(max-width:768px){.cn-cards{grid-template-columns:1fr;gap:10px}.cn-card a{font-size:1.05rem}}
 
-/* --- card swap (Now section) --- */
-.now-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,440px);
-  gap:clamp(28px,5vw,72px);align-items:center;margin-top:var(--s-3)}
-.now-intro{color:var(--muted);font-size:1.02rem;line-height:1.7;max-width:52ch}
-.cardswap{position:relative;height:300px;margin-right:var(--s-4)}
-.cardswap-item{position:absolute;inset:0;will-change:transform}
-.cardswap-item .now-card{height:100%;display:flex;flex-direction:column}
-.cardswap-item .now-card p{flex:1}
-/* 992: the wide side-by-side composition collapses before the page does */
-@media(max-width:992px){
-  .now-layout{grid-template-columns:1fr}
-  .cardswap{height:280px;margin-right:24px;max-width:460px}
-}
+/* --- now: the lead-in above the three cards --- */
+/* The intro used to be the left half of a two-column composition with a card
+   stack in the right, which left a short paragraph alone in a ~700px box. It
+   is a lead-in now: full width under the head, capped by the line-length rule
+   further down, with the three cards across underneath. */
+.now-intro{margin-top:var(--s-3);color:var(--muted);font-size:1.02rem;line-height:1.7}
 
 /* --- fluid glass band (Contact) --- */
 .glass-band{position:relative;height:clamp(260px,34vh,360px);margin:var(--s-4) 0 var(--s-1);

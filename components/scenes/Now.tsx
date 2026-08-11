@@ -1,7 +1,6 @@
 "use client";
 import { motion, useReducedMotion } from "framer-motion";
 import SectionHead from "@/components/ui/SectionHead";
-import CardSwap from "@/components/ui/CardSwap";
 import { DUR, EASE } from "@/lib/motion";
 
 const CARDS = [
@@ -14,20 +13,26 @@ const CARDS = [
     p: "Pushing toward FAANG and HFT — an LMAX-style limit-order-book matching engine is next on the bench, chasing microseconds.", tilt: -0.8 },
 ];
 
-/** Cards drop in crooked like stickers — Framer Motion owns this. */
+/** Three lanes, three cards, all on screen.
+ *
+ *  These used to be a `CardSwap` stack — one card visible, the other two
+ *  tucked behind it on a 4.2s timer. Three is few enough to just show, and
+ *  the stack was costing twice over: it hid two thirds of the section's
+ *  content, and it was the one thing on a scrub-driven page that moved on
+ *  wall-clock time whether you were looking at it or not.
+ *
+ *  Cards drop in crooked like stickers — Framer Motion owns this. */
 export default function Now() {
   const reduce = useReducedMotion();
   return (
     <section className="block" id="now">
       <div className="wrap">
         <SectionHead title="On the grid this season." />
-        <div className="now-layout">
-          <p className="now-intro">
-            Three lanes open at once: the F1 dashboard getting its final polish,
-            a systems paper turning into running code, and the next benchmark on the bench.
-            Hover the stack to hold a card.
-          </p>
-          <CardSwap>
+        <p className="now-intro">
+          Three lanes open at once: the F1 dashboard getting its final polish,
+          a systems paper turning into running code, and the next benchmark on the bench.
+        </p>
+        <div className="now-grid">
           {CARDS.map((c, i) => (
             <motion.div
               className="now-card"
@@ -46,7 +51,6 @@ export default function Now() {
               )}
             </motion.div>
           ))}
-          </CardSwap>
         </div>
       </div>
     </section>

@@ -30,6 +30,15 @@ plainly when a change has not been looked at in a browser.
   GSAP timelines are effects driven by it.
 - `lib/data/projects.ts` is the single source of truth: each project renders as
   a menu dish, a carousel card and a serve-overlay detail.
+- `components/showcase/` is the work carousel: `Carousel` places the row,
+  `Card` is one project, `previews.tsx` is the drawing on each card. Position,
+  scale, opacity and turn are a pure function of a card's distance from the
+  middle and of nothing else — no current-index state, no wrap, no clones,
+  which is what makes the row safe to scrub backwards. It reads `morph` and
+  `focus` off `lib/scrollStore.ts` in one rAF; `CinemaDeck` is the only writer.
+  Token colours reach the inline SVG previews through `style`, never through a
+  presentation attribute — `fill="var(--x)"` is not substituted and renders
+  black on a black card.
 - `lib/motion.ts` — every curve, duration and scrub value. `:root` in
   `app/globals.css` mirrors it.
 - `ShopFacade.tsx` is a machine-ported SVG, geometry preserved 1:1. Don't
@@ -185,9 +194,10 @@ On `:root` in `app/globals.css`. Use the token, not the literal:
   asks for — a missing weight doesn't fall back visibly, it silently matches
   up to the next one and collapses the step between two tiers.
 - **Canvas never gets the font swap.** A 2D or WebGL painter bakes in whatever
-  face was loaded the moment it drew. `AsciiGlitchName` and the Showcase card
-  textures both wait on `document.fonts.ready` and repaint; anything new that
-  paints type into a canvas has to do the same or it's a race.
+  face was loaded the moment it drew. `AsciiGlitchName` waits on
+  `document.fonts.ready` and repaints; anything new that paints type into a
+  canvas has to do the same or it's a race. (The Showcase cards used to be on
+  this list. They are DOM now, so the swap is simply the browser's problem.)
 - Sections carry **no numbered label**. "01 — Showcase" and its five siblings
   read as a table of contents pasted over a page meant to be one continuous
   shot, and made each scene announce itself before you could look at it.
@@ -213,9 +223,12 @@ preserve-the-design-first, migrate selectors to utilities gradually.
 - The share card (`app/opengraph-image.tsx`) renders in next/og's default face,
   not Syne. `ImageResponse` needs a TTF/OTF/WOFF it can embed, and the only
   copies here are the hashed **WOFF2** build outputs, which it won't take.
-- The Showcase carousel is still pointer-only — drag to spin, click to open.
-  The five projects are all reachable from the menu below, so nothing is lost,
-  but the carousel itself has no keyboard path.
+- The Showcase carousel **pans on scroll only**. Every card is a `<button>`,
+  so all five take focus and open from the keyboard — but nothing on the
+  keyboard moves the row, because where the row sits is a fact about the
+  scroll position and `CinemaDeck` owns that. Drag and a horizontal trackpad
+  swipe give a nudge that springs back for the same reason. Moving between
+  cards is scrolling the page, which the five menu entries below also do.
 - The diner section is head + one viewport, and `CinemaDeck` rests anything
   taller than the viewport with its *bottom* on the bottom of the screen — so
   at rest the visible window is exactly the frame and the section head has

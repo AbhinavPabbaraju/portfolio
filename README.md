@@ -51,9 +51,3 @@ npm install
 npm run dev        # http://localhost:3000
 npm run build && npm start
 ```
-
-## Known follow-ups
-- Photo gallery polaroids are placeholders — drop real images into `PhotoGallery.tsx`.
-- Legacy extras not yet ported: preloader ink-wipe, pixel cursor trail, laser beam,
-  magnifying dock, ASCII name easter egg.
-- Dead legacy CSS (loader/dock/trail selectors) can be pruned once follow-ups land.

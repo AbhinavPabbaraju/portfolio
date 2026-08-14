@@ -28,8 +28,8 @@ import { SCRUB, prefersReducedMotion } from "@/lib/motion";
  *  reads as a rendering fault rather than a camera. Against a near-black
  *  background, fading toward that background dims identically and never
  *  leaves the compositor. */
-/** Fraction of the showcase's hold spent unrolling the ring into the stair.
- *  The rest steps through the stair, one card at a time — so this also sets
+/** Fraction of the showcase's hold spent opening the deck of cards out into
+ *  the row. The rest pans along the row, one card at a time — so this sets
  *  how much scroll each card gets. */
 const UNROLL = 0.26;
 
@@ -155,7 +155,7 @@ export default function CinemaDeck() {
              the scene is fixed and was otherwise inert. The scene's pacing
              is untouched — the hold just has something in it now.
              Written into a plain object, not React state: this runs on
-             every scroll frame, and the carousel reads it in `useFrame`. */
+             every scroll frame, and the carousel reads it in its own rAF. */
           onUpdate: sel === "#showcase"
             ? (self) => {
                 const dwell = hold / (hold + 1);

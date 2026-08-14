@@ -4,6 +4,7 @@ import { textArt, textW } from "@/lib/library/font";
 import { LOGICAL_H, LOGICAL_W, PAL, tone } from "@/lib/library/pixel";
 import { BAY_W, BAY_X0, EAST, LAMPS, ROOM, TABLES, bayX, pierX } from "@/lib/library/scene";
 import Bookcase from "./Bookcase";
+import { COLD, Glow, Shaft } from "./Light";
 import {
   CardCatalogue, Clock, ExitDoor, Frame, HangingPot, Noticeboard, Poster, QuietBoard, Stair, Vine,
   Window,
@@ -178,17 +179,9 @@ function Sign({ label, x, y }: { label: string; x: number; y: number }) {
   );
 }
 
-/** The pool a lamp throws. Pixel art has no gradients, so depth is a few
- *  discrete steps of the same warm value — never a blur. */
-function Pool({ x, y, h, w = 8 }: { x: number; y: number; h: number; w?: number }) {
-  return (
-    <g fill={PAL["9"]} pointerEvents="none">
-      <polygon points={`${x - w},${y} ${x + w},${y} ${x + w * 3},${y + h} ${x - w * 3},${y + h}`} opacity={0.07} />
-      <polygon points={`${x - w * 0.6},${y} ${x + w * 0.6},${y} ${x + w * 2},${y + h} ${x - w * 2},${y + h}`} opacity={0.07} />
-      <polygon points={`${x - w * 0.3},${y} ${x + w * 0.3},${y} ${x + w},${y + h} ${x - w},${y + h}`} opacity={0.1} />
-    </g>
-  );
-}
+/* Where a lamp's light is drawn: `Light.tsx`. Nothing in this file invents a
+   glow of its own — a beam is a bloom, a shaft and a pool, and all three are
+   stated in coordinates taken off the sprite that throws them. */
 
 export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: { x: number; y: number }) => void }) {
   const upper = BAYS.filter((b) => b.floor === "upper");
@@ -299,14 +292,71 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
         </g>
       ))}
 
-      {/* ══ lamps, and what they throw ══ */}
-      {LAMPS.map((l) => (
-        <g key={`${l.x}-${l.y}`}>
-          <Box x={l.x + 5} y={l.y - 16} w={1} h={16} c="0" />
-          <Px art={PENDANT} x={l.x} y={l.y} />
-          <Pool x={l.x + 5} y={l.y + 8} h={l.floor === "upper" ? 112 : 108} w={10} />
-        </g>
-      ))}
+      {/* ══ what the two lights of glass let in ══
+          The window and the door are the room's only cold light, and until
+          now neither of them put anything on anything: two bright holes in a
+          wall with the woodwork below them as black as if they were shuttered.
+
+          They are drawn here rather than with their own fixtures for the same
+          reason the lamps are — a cast has to land on the balcony and the
+          floorboards, and both of those are painted after the east wall is.
+          Drawn up there it would be buried under them.
+
+          Faint is the whole point. This is the moon against four lamps, and
+          the window's job in this room is to be the one cold thing that makes
+          every warm thing read as warm. Turn it up and it stops being night
+          outside. */}
+      <Shaft x={EAST + 119} y={112} h={ROOM.slab - 112} mouth={28} spread={38} gain={0.9} ramp={COLD} />
+      <Glow x={EAST + 119} y={ROOM.railTop + 1} rx={34} ry={2} gain={1.7} ramp={COLD} />
+      <Glow x={EAST + 119} y={ROOM.slab + 1} rx={38} ry={2} gain={1.9} ramp={COLD} />
+      {/* and what comes under the door: a patch of night on the boards at the
+          threshold. No shaft for this one — the glass is at head height and
+          the panelling below it is solid, so light on the door's own bottom
+          rail would be light arriving from inside the door. */}
+      <Glow x={EAST + 119} y={ROOM.floor + 11} rx={36} ry={11} gain={2} ramp={COLD} />
+
+      {/* ══ lamps, and what they throw ══
+          Every number below is read off the `PENDANT` map rather than chosen:
+          the sprite is eleven wide, so its centre line is `x+5`; row 5 is the
+          shade's mouth and rows 6–7 are the filament, so the light leaves at
+          `y+6` and no lower. The old drawing started at `y+8` and two pixels
+          wider than the shade, which is a beam with a gap between it and the
+          lamp that is supposedly casting it.
+
+          The far end matters as much: a shaft is run to the surface it
+          actually falls on — the balcony's front edge upstairs, the
+          floorboards down here — and that surface is given a pool. Light
+          that stops in mid-air at a horizontal line, which is what the old
+          fixed `h` did at both storeys, is the same fault upside down. */}
+      {LAMPS.map((l) => {
+        const cx = l.x + 5;                                   // the sprite's centre line
+        const bulb = l.y + 6;                                 // the row the filament is on
+        const up = l.floor === "upper";
+        const land = up ? ROOM.slab : ROOM.floor;             // what it falls on
+        return (
+          <g key={`${l.x}-${l.y}`}>
+            <Box x={cx} y={l.y - 16} w={1} h={16} c="0" />
+            <Px art={PENDANT} x={l.x} y={l.y} />
+            <Shaft x={cx} y={bulb} h={land - bulb} mouth={5} spread={30} gain={1.5} />
+            {/* the bloom, over the shade rather than under it — a bulb is the
+                one thing in the room brighter than its own fixture */}
+            <Glow x={cx} y={bulb + 2} rx={10} ry={7} gain={2.4} />
+            {up ? (
+              /* Upstairs the beam lands on two horizontal edges seen edge-on
+                 — the handrail first, the balcony deck behind it — so what it
+                 puts there are streaks. A round pool, which is what this was,
+                 lands on the balcony's *vertical* fascia and reads as a stain
+                 on the woodwork rather than as light on a floor. */
+              <>
+                <Glow x={cx} y={ROOM.railTop + 1} rx={30} ry={2} gain={1.9} />
+                <Glow x={cx} y={ROOM.slab + 1} rx={36} ry={2} gain={2.1} />
+              </>
+            ) : (
+              <Glow x={cx} y={ROOM.floor + 14} rx={48} ry={14} gain={2.1} />
+            )}
+          </g>
+        );
+      })}
 
       {/* ══ the reading floor ══
           Everything here stands *in front of* the wall, so its base sits
@@ -388,13 +438,27 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
                 The lamp's foot sits *on* the surface. It used to be posted at
                 `top - 19` with a ten-pixel sprite, which hung it nine pixels
                 clear of the wood with its light pooling on nothing. */}
-            <Box x={t.x + t.w - 68} y={top} w={64} h={3} c="9" opacity={0.2} />
+            {/* the pool goes down *before* the lamp, so the lamp stands in its
+                own light rather than under a wash laid over the top of it —
+                and it is clamped to the two ends of the plank, because the
+                flat 64-wide bar this replaced ran off the edge into the air */}
+            <Glow x={t.x + t.w - 31} y={top + 3} rx={46} ry={7} gain={2.3}
+              x0={t.x - 6} x1={t.x + t.w + 6} />
             <Px art={DESK_LAMP} x={t.x + t.w - 36} y={top - 10} />
-            <Pool x={t.x + t.w - 31} y={top - 6} h={7} w={7} />
+            {/* six pixels of shaft, from the filament to the wood: a banker's
+                shade is opaque, so what it throws is a short cone under the
+                rim, not a beam */}
+            <Shaft x={t.x + t.w - 31} y={top - 6} h={6} mouth={5} spread={12} gain={1.8} step={1} />
+            {/* and the bloom stays *under* the rim. Given the pendant's own
+                halo it swallowed the shade, and that shade is the only
+                saturated colour on the ground floor — a green lamp washed
+                warm is a beige lamp. */}
+            <Glow x={t.x + t.w - 31} y={top - 3} rx={8} ry={3} gain={1.8} />
             {t.occupied ? (
               <>
                 <Px art={LAPTOP} x={t.x + 52} y={top - 7} />
-                <Box x={t.x + 51} y={top} w={13} h={2} c="w" opacity={0.25} />
+                <Glow x={t.x + 57} y={top + 1} rx={13} ry={4} gain={1.9}
+                  ramp={COLD} x0={t.x - 6} x1={t.x + t.w + 6} />
                 {/* the forearm, drawn after the top so it rests on it */}
                 <rect x={t.x + 34} y={top - 3} width={16} height={3} fill={tone(t.coat, 1.1)} />
                 <rect x={t.x + 48} y={top - 3} width={4} height={2} fill="#8a6a52" />

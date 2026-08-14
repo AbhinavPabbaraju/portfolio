@@ -1084,11 +1084,26 @@ section.library{padding:0;position:relative}
 .lib-room{position:absolute;left:0;top:0;max-width:none;will-change:transform;
   image-rendering:pixelated}
 /* Every edge in this room is a pixel edge. Without this the browser
-   antialiases the rectangles and the whole style dissolves into mush. */
-.lib-room rect,.lib-room polygon{shape-rendering:crispEdges}
-/* the pools of lamp light are the one thing allowed a soft edge, and even
-   they are stepped rather than blurred — see `Pool` */
-.lib-room polygon{shape-rendering:auto}
+   antialiases the rectangles and the whole style dissolves into mush —
+   including the light, which is why there is no exception here for it:
+   a beam is built out of stepped whole-pixel rows like everything else, and
+   the soft edge it used to get from an antialiased polygon is exactly what
+   made it read as a cut-out lying over the room. See `Light.tsx`. */
+.lib-room rect{shape-rendering:crispEdges}
+
+/* ── the stars in the two lights of glass ──
+   Same trick, same names as the diner's `.bstar`: one scintillation, five
+   clocks dealt round, so thirteen pixels never blink in unison. The dip is on
+   a wrapper `<g>` and each star keeps its own opacity attribute, so the two
+   multiply — and killing the animation below leaves every star lit at the
+   value it was drawn at rather than snapping to full. */
+.libstar{animation:libstar 4.4s ease-in-out infinite}
+.libstar.s2{animation-duration:6.2s;animation-delay:-1.3s}
+.libstar.s3{animation-duration:5.1s;animation-delay:-2.9s}
+.libstar.s4{animation-duration:7.3s;animation-delay:-.6s}
+.libstar.s5{animation-duration:3.8s;animation-delay:-3.4s}
+/* dip, half-recover, dip again — a star scintillates, it does not breathe */
+@keyframes libstar{0%,100%{opacity:1}26%{opacity:.2}44%{opacity:.85}66%{opacity:.35}}
 
 /* A spine that goes somewhere lifts out of the shelf when you reach for it.
    2px at logical scale, which is 8–12 real pixels: small on the grid, plain
@@ -1103,7 +1118,7 @@ section.library{padding:0;position:relative}
   z-index:2;font-family:var(--f-mono);font-size:11px;letter-spacing:.14em;
   color:var(--dim);pointer-events:none}
 
-@media(prefers-reduced-motion:reduce){.lib-book{transition:none}}
+@media(prefers-reduced-motion:reduce){.lib-book{transition:none}.libstar{animation:none}}
 
 /* ============================================================ WRITING */
 .notes{border-top:1px solid var(--line)}

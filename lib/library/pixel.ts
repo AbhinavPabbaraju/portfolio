@@ -112,6 +112,15 @@ export const PAL = {
   Q: "#3d9b8a", // teal
   R: "#c4693c", // ember
   S: "#bf5a70", // rose
+  /* ── the light itself ──
+     Distinct from `8`/`9`/`a`, which are the *fixtures*: brass, an enamel
+     shade, a lit filament. Those are gold and this is amber, and light drawn
+     in the colour of the lamp it comes out of reads as more lamp rather than
+     as illumination. Both values are the diner's — `#f2a656` is what lights
+     that street — so the two scenes are lit by the same bulb even though one
+     is curves and this one is pixels. */
+  T: "#f2a656", // lamp amber — the body of a beam
+  U: "#ffcf9a", // hot spill  — the first pixels off a bulb
 } as const;
 
 export type PalKey = keyof typeof PAL;

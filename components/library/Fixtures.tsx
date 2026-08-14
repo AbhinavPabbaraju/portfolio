@@ -3,6 +3,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { PAL } from "@/lib/library/pixel";
 import { ROOM, STAIR, pixelLine } from "@/lib/library/scene";
 import { textArt, textW } from "@/lib/library/font";
+import { COLD, GREEN, Glow } from "./Light";
 import Px, { Box } from "./Px";
 
 /** The staircase to the balcony.
@@ -65,6 +66,49 @@ export function Stair({ x1 }: { x1: number }) {
   );
 }
 
+/** The moon.
+ *
+ *  At 4×4 it was the same size as the stars around it and only its being
+ *  square told them apart — which is not a moon, it is a big star. Seven
+ *  across is the smallest disc that still steps like a circle rather than a
+ *  cut corner.
+ *
+ *  Shaded along the lower-left limb and given two maria, because a plain
+ *  white disc reads as a hole punched in the glass. `w` is the same
+ *  moon-blue the stars are dimmed with, so the shading is the moon's own
+ *  colour turned down rather than a second grey introduced to the palette. */
+const MOON = [
+  "..FFF..",
+  ".FFFFF.",
+  "FFFFwFF",
+  "FFFFFFF",
+  "wFFwFFF",
+  ".wwFFF.",
+  "..www..",
+];
+
+/** A star, on a clock of its own.
+ *
+ *  A star twinkles because the air in front of it moves, which has nothing to
+ *  do with the star — so all of them run the same short scintillation and the
+ *  only thing that differs is duration and delay. One shared animation makes
+ *  thirteen pixels blink in unison, which is a string of fairy lights rather
+ *  than a sky. Five clocks, dealt round, is enough that they never fall back
+ *  into step; the diner's `.bstar` does the same thing with the same names.
+ *
+ *  The dip lives on the wrapper and the pixel keeps its own opacity, so the
+ *  two multiply — and under reduced motion, where the animation is dropped,
+ *  the star is simply left lit at the value it was drawn at. */
+const CLOCKS = ["", "s2", "s3", "s4", "s5"];
+
+function Star({ x, y, i, dim }: { x: number; y: number; i: number; dim?: boolean }) {
+  return (
+    <g className={`libstar ${CLOCKS[i % CLOCKS.length]}`.trim()}>
+      <Box x={x} y={y} w={1} h={1} c="F" opacity={dim ? 0.7 : 1} />
+    </g>
+  );
+}
+
 /** The arched night window. The only cold light in the room, which is what
  *  makes every lamp in it read as warm.
  *
@@ -94,6 +138,14 @@ export function Window({ x, y, w, h }: { x: number; y: number; w: number; h: num
 
   return (
     <g>
+      {/* What the glass puts on the wall around it, drawn first — so it lands
+          on the plaster and the stone reveal stays crisp over the top of it.
+          A window this size on a near-black wall with nothing spilling off it
+          is a picture of a window hung on the wall rather than a hole in it.
+          Faint on purpose: it is the moon, and it is competing with four
+          lamps. */}
+      <Glow x={cx} y={y + 40} rx={r + 14} ry={Math.round(h / 2) + 14} gain={1.3} ramp={COLD} />
+
       {/* stone surround: the arch, then the jambs carried down to the sill */}
       {arch(r + 3, y - 3, PAL.G, "t")}
       <Box x={cx - r - 3} y={spring} w={w + 6} h={bottom - spring} c="G" />
@@ -108,12 +160,16 @@ export function Window({ x, y, w, h }: { x: number; y: number; w: number; h: num
         <Box key={`c${i}`} x={cx + dx} y={bottom - 5} w={lw} h={1} c="F" opacity={0.55} />
       ))}
 
-      {/* stars, kept off the muntin lines so none of them reads as a join */}
+      {/* Stars, kept off the muntin lines so none of them reads as a join,
+          and each one on its own clock — see `Star`. */}
       {[[-20, 12], [-9, 22], [-24, 30], [11, 8], [19, 18], [6, 34], [-15, 41], [22, 38]].map(
-        ([dx, dy], i) => <Box key={`s${i}`} x={cx + dx} y={y + dy} w={1} h={1} c="F" opacity={i % 3 ? 0.7 : 1} />
+        ([dx, dy], i) => <Star key={`s${i}`} x={cx + dx} y={y + dy} i={i} dim={!!(i % 3)} />
       )}
-      <Px art={[".FF.", "FFFF", "FFFF", ".FF."]} x={cx + 8} y={y + 24} />
-      <Box x={cx + 9} y={y + 25} w={2} h={2} c="E" opacity={0.35} />
+      {/* the moon, in its own haze. The glow goes down first: a disc with a
+          hard edge and nothing around it is a sticker on the glass, and the
+          haze is the only thing saying the sky it sits in has air in it */}
+      <Glow x={cx + 10} y={y + 25} rx={10} ry={10} gain={1.6} ramp={COLD} />
+      <Px art={MOON} x={cx + 7} y={y + 22} />
 
       {/* glazing bars: centre mullion, the springing transom, two below it */}
       <Box x={cx - 1} y={y + 2} w={2} h={h - 2} c="4" />
@@ -171,16 +227,25 @@ export function ExitDoor({ x, y, h }: { x: number; y: number; h: number }) {
       <Box x={x} y={y} w={1} h={h} c="6" />
       <Box x={x + w - 1} y={y} w={1} h={h} c="4" />
 
+      {/* the spill off the glazed light, on the leaf and the casing around it.
+          Same faint moonlight as the window's, at the size of the opening
+          throwing it — the two cold lights in this room have to agree about
+          how much light there is outside */}
+      <Glow x={glass.x + Math.round(glass.w / 2)} y={glass.y + Math.round(glass.h / 2)}
+        rx={Math.round(glass.w / 2) + 13} ry={Math.round(glass.h / 2) + 12} gain={1.3} ramp={COLD} />
+
       {/* the glazed light, and the night on the other side of it */}
       {sunk(glass.x, glass.y, glass.w, glass.h)}
       <Box x={glass.x} y={glass.y} w={glass.w} h={glass.h} c="E" />
       <Box x={glass.x} y={glass.y + glass.h - 7} w={glass.w} h={4} c="u" />
       <Box x={glass.x} y={glass.y + glass.h - 3} w={glass.w} h={3} c="v" opacity={0.45} />
-      <Box x={glass.x + 4} y={glass.y + 5} w={1} h={1} c="F" opacity={0.8} />
-      <Box x={glass.x + 19} y={glass.y + 9} w={1} h={1} c="F" opacity={0.6} />
-      <Box x={glass.x + 12} y={glass.y + 3} w={1} h={1} c="F" />
-      <Box x={glass.x + 8} y={glass.y + glass.h - 5} w={2} h={1} c="F" opacity={0.5} />
-      <Box x={glass.x + 24} y={glass.y + glass.h - 5} w={1} h={1} c="F" opacity={0.5} />
+      {/* the same sky as the window's, seen through a smaller hole — so the
+          same stars, on the same five clocks */}
+      <Star x={glass.x + 4} y={glass.y + 5} i={1} dim />
+      <Star x={glass.x + 19} y={glass.y + 9} i={3} dim />
+      <Star x={glass.x + 12} y={glass.y + 3} i={0} />
+      <Star x={glass.x + 8} y={glass.y + glass.h - 5} i={2} dim />
+      <Star x={glass.x + 24} y={glass.y + glass.h - 5} i={4} dim />
       {/* glazing bars, and the sill the light sits on */}
       <Box x={glass.x + Math.floor(glass.w / 2) - 1} y={glass.y} w={2} h={glass.h} c="4" />
       <Box x={glass.x} y={glass.y + Math.floor(glass.h / 2)} w={glass.w} h={1} c="4" />
@@ -225,15 +290,19 @@ export function ExitSign({ x, y }: { x: number; y: number }) {
   const left = x - Math.round(w / 2);
   return (
     <g>
+      {/* the bloom it sits in, drawn first so the box is the brightest thing
+          inside its own glow */}
+      <Glow x={x} y={y + Math.round(h / 2)} rx={Math.round(w / 2) + 7} ry={h} gain={1.6} ramp={GREEN} />
       <Box x={left} y={y} w={w} h={h} c="0" />
       <Box x={left + 1} y={y + 1} w={w - 2} h={h - 2} c="C" />
       <Box x={left + 1} y={y + 1} w={w - 2} h={1} c="D" opacity={0.5} />
       <Px art={textArt("EXIT", "D")} x={left + 5} y={y + 3} />
-      {/* the cord it hangs off, and the light it spills downwards */}
+      {/* the cord it hangs off, and the wash it puts down the casing. Three
+          stacked bars stepping outwards is a diagram of a fade rather than
+          one; this is the same drawing as every other light in the room, in
+          the one colour that is not warm. */}
       <Box x={x - 1} y={y - 3} w={2} h={3} c="4" />
-      <Box x={left + 2} y={y + h} w={w - 4} h={2} c="C" opacity={0.22} />
-      <Box x={left - 2} y={y + h + 2} w={w + 4} h={2} c="C" opacity={0.13} />
-      <Box x={left - 6} y={y + h + 4} w={w + 12} h={3} c="C" opacity={0.07} />
+      <Glow x={x} y={y + h + 5} rx={Math.round(w / 2) + 9} ry={9} gain={2.6} ramp={GREEN} />
     </g>
   );
 }

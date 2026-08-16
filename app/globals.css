@@ -837,7 +837,22 @@ section.cafe{padding-bottom:0}
      scene is arriving or receding under the deck's scale. A short dissolve
      is all that needs, and any deeper eats visible sky. */
   -webkit-mask-image:linear-gradient(180deg,transparent 0,#000 7%);
-  mask-image:linear-gradient(180deg,transparent 0,#000 7%)}
+  mask-image:linear-gradient(180deg,transparent 0,#000 7%);
+  /* ── why these two are promoted ──
+     The deck's arrival scrubs `scale` 0.97→1 on the whole section across a
+     viewport of scroll, and GSAP writes that as an inline transform every
+     frame — which is a main-thread style change, not a composited animation.
+     Anything underneath it that is not in its own layer gets re-rastered at
+     the new scale on every one of those frames, and what is underneath here
+     is a mask plus seventeen SVG filter regions, two of them 26px Gaussians.
+     That is the whole of the lag coming into this scene: not element count,
+     which is a fifth of the library's, but re-blurring the street sixty
+     times a second while it arrives.
+
+     Promoted, each plane rasterises once and the compositor scales the
+     result. `.cafe-stage` already had this, which is why the shop's own
+     thirteen filters never cost anything — these two were simply missed. */
+  will-change:transform}
 .cafe-backdrop{z-index:0}
 .cafe-backdrop svg,.cafe-wires svg{width:100%;height:100%;display:block}
 .cafe-stage{z-index:1}

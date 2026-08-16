@@ -184,10 +184,32 @@ export default function Backdrop() {
           <stop offset="1" stopColor="#472b60" />
         </linearGradient>
 
+        {/* ── two sizes of the same blur, and why ──
+            A filter region is a *percentage of the filtered element's own
+            box*, so one filter shared between a lamp bulb and a pool of light
+            three hundred units wide is sized for whichever needs the larger
+            fraction — the bulb — and the pool then pays it. `nblur` at 260%
+            square is 6.8× the area of a snug region, and the four road spills
+            using it are the biggest filtered shapes in the scene: together
+            they were 1.7M filter pixels to re-blur.
+
+            The margin a Gaussian actually needs is about 3σ. `nblur` is σ=9,
+            so 27 units; `nsoft` is σ=4, so 12. The `L` variants below are the
+            smallest regions that still clear 3σ on the *large, flat* shapes
+            they are used by — anything smaller and the blur clips against the
+            region and leaves a hard edge where light should fade out. The
+            originals stay for the small round ones, which genuinely need the
+            wide box. Same picture, about a third of the pixels. */}
         <filter id="nblur" x="-80%" y="-80%" width="260%" height="260%">
           <feGaussianBlur stdDeviation="9" />
         </filter>
+        <filter id="nblurL" x="-16%" y="-40%" width="132%" height="180%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
         <filter id="nsoft" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <filter id="nsoftL" x="-12%" y="-22%" width="124%" height="144%">
           <feGaussianBlur stdDeviation="4" />
         </filter>
         {/* the shop's own neon filter lives in the facade's SVG. Referencing
@@ -349,9 +371,9 @@ export default function Backdrop() {
               them; with it, the clusters are texture *on* a tree. Two ellipses
               so the mass is already lit top-to-bottom before the tonal bands
               go over it. */}
-          <ellipse cx="128" cy="318" rx="96" ry="62" fill="#54265e" opacity=".55" filter="url(#nsoft)" />
-          <ellipse cx="128" cy="296" rx="74" ry="44" fill="#6f3578" opacity=".4" filter="url(#nsoft)" />
-          <ellipse cx="128" cy="352" rx="82" ry="36" fill="#3d1e48" opacity=".4" filter="url(#nsoft)" />
+          <ellipse cx="128" cy="318" rx="96" ry="62" fill="#54265e" opacity=".55" filter="url(#nsoftL)" />
+          <ellipse cx="128" cy="296" rx="74" ry="44" fill="#6f3578" opacity=".4" filter="url(#nsoftL)" />
+          <ellipse cx="128" cy="352" rx="82" ry="36" fill="#3d1e48" opacity=".4" filter="url(#nsoftL)" />
           <path d="M96,618 C106,604 110,588 108,564 C106,532 110,514 112,486
                    C114,462 117,452 119,438 L137,438 C136,458 133,464 132,488
                    C130,516 134,536 136,564 C138,590 142,604 148,618 Z"
@@ -694,7 +716,7 @@ export default function Backdrop() {
                 no outline, and an un-blurred one reads as a paper cut-out
                 lying in the road */}
             <path d={`M${x - 32},${GROUND + 2} L${x + 32},${GROUND + 2} L${x + 94},${VB_BOTTOM} L${x - 94},${VB_BOTTOM} Z`}
-                  fill="url(#nthrow)" filter="url(#nblur)" />
+                  fill="url(#nthrow)" filter="url(#nblurL)" />
             {/* the vertical smear directly beneath the bulb — the single
                 strongest cue that a surface is wet */}
             <ellipse cx={x} cy={GROUND + 52} rx="16" ry="52" fill="#f2a656" opacity=".1" />
@@ -704,8 +726,8 @@ export default function Backdrop() {
         {/* what the shop puts on the road below its own box. Its facade
             draws spill only as far as its street line; the frame's floor is
             below that, and the gap read as the light switching off. */}
-        <ellipse cx="800" cy={GROUND + 8} rx="330" ry="70" fill="#f2a656" opacity=".07" filter="url(#nblur)" />
-        <ellipse cx="800" cy={GROUND + 64} rx="220" ry="52" fill="#ffcf9a" opacity=".045" filter="url(#nblur)" />
+        <ellipse cx="800" cy={GROUND + 8} rx="330" ry="70" fill="#f2a656" opacity=".07" filter="url(#nblurL)" />
+        <ellipse cx="800" cy={GROUND + 64} rx="220" ry="52" fill="#ffcf9a" opacity=".045" filter="url(#nblurL)" />
         {/* The facade draws its own reflections, but its frame stops 80 units
             short of the bottom of the grid — so the last stretch of road in
             front of the shop, the part nearest the viewer, is this plane's to
@@ -724,8 +746,8 @@ export default function Backdrop() {
             This ellipse is centred on the join and reaches well above and
             below it, so the two halves of the road hand over inside a soft
             gradient instead of at an edge. */}
-        <ellipse cx="800" cy="820" rx="300" ry="58" fill="#f2a656" opacity=".05" filter="url(#nblur)" />
-        <ellipse cx="800" cy={GROUND + 106} rx="252" ry="46" fill="#f2a656" opacity=".035" filter="url(#nblur)" />
+        <ellipse cx="800" cy="820" rx="300" ry="58" fill="#f2a656" opacity=".05" filter="url(#nblurL)" />
+        <ellipse cx="800" cy={GROUND + 106} rx="252" ry="46" fill="#f2a656" opacity=".035" filter="url(#nblurL)" />
         <g fill="#ffcf9a" opacity=".055">
           <ellipse cx="800" cy={GROUND + 88} rx="228" ry="1.8" />
           <ellipse cx="792" cy={GROUND + 101} rx="188" ry="2.4" />

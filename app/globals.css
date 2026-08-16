@@ -62,6 +62,14 @@
 
   /* ── breakpoints ── 768 (layout collapses) · 992 (multi-column grids).
      Decoration-only queries keep their own thresholds, noted inline. */
+
+  /* ── the chrome standing over the page ──
+     `.cn-bar`'s height, and the strip of every scene that is behind a fixed,
+     opaque bar rather than on screen. Most scenes never need the number —
+     section padding keeps their content out from under it. A scene that is a
+     picture to the top edge does: the library reads this to inset its room by
+     exactly the bar, so nothing in the drawing is composed underneath it. */
+  --chrome-h:62px;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 /* Lenis owns scroll travel. Native smooth scrolling animates the same
@@ -1465,7 +1473,9 @@ h1.name.asciified canvas{image-rendering:pixelated}
   transform:translate3d(0,36px,0);
   transition:border-color var(--dur-sm) var(--ease-out),background-color var(--dur-sm) var(--ease-out),transform var(--dur-md) var(--ease-in-out)}
 .cardnav.scrolled{transform:translate3d(0,0,0);border-bottom-color:var(--line);background:rgba(9,9,13,.92)}
-.cn-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;height:62px}
+/* height from `--chrome-h`: the library insets its room by that number, and
+   the two have to be the same one or the bar lands on the drawing again */
+.cn-bar{display:flex;align-items:center;justify-content:space-between;gap:18px;height:var(--chrome-h)}
 .cn-brand{font-family:var(--f-mono);font-size:13px;letter-spacing:.08em;color:var(--text)}
 .cn-toggle{display:inline-flex;align-items:center;gap:10px;cursor:pointer;
   font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;color:var(--text);

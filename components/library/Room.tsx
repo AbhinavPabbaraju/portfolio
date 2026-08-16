@@ -1,7 +1,7 @@
 "use client";
 import { BAYS, type Book } from "@/lib/data/library";
 import { textArt, textW } from "@/lib/library/font";
-import { BLEED, LOGICAL_H, LOGICAL_W, PAL, tone } from "@/lib/library/pixel";
+import { BLEED, HEADROOM, LOGICAL_H, LOGICAL_W, PAL, tone } from "@/lib/library/pixel";
 import { BAY_W, BAY_X0, EAST, LAMPS, ROOM, TABLES, bayX, pierX } from "@/lib/library/scene";
 import Bookcase from "./Bookcase";
 import { COLD, Glow, Shaft } from "./Light";
@@ -204,16 +204,23 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
 
   return (
     <g shapeRendering="crispEdges">
-      {/* ══ the shell ══ */}
-      <Box x={0} y={0} w={LOGICAL_W} h={LOGICAL_H + BLEED} c="2" />
-      <Box x={0} y={0} w={LOGICAL_W} h={ROOM.ceiling} c="1" />
+      {/* ══ the shell ══
+          It starts `HEADROOM` above the room and ends `BLEED` below it. Both
+          ends are the same idea: the frame is a viewport, the room is a fixed
+          number of rows, and what the drawing does not reach the frame's own
+          background does — badly. Above, the surplus is ceiling and the page's
+          fixed bar stands on it; below, it is floor. */}
+      <Box x={0} y={-HEADROOM} w={LOGICAL_W} h={LOGICAL_H + BLEED + HEADROOM} c="2" />
+      <Box x={0} y={-HEADROOM} w={LOGICAL_W} h={ROOM.ceiling + HEADROOM} c="1" />
       <Box x={0} y={ROOM.ceiling - 3} w={LOGICAL_W} h={3} c="4" />
       {/* the upper storey sits in its own darker band, which is what makes the
           balcony read as a shelf of space rather than a painted line */}
       <Box x={0} y={ROOM.ceiling} w={LOGICAL_W} h={ROOM.railTop - ROOM.ceiling} c="1" />
-      {/* ceiling joists, receding across the room */}
+      {/* ceiling joists, receding across the room — carried up through the
+          headroom, so the dark behind the bar is the room's ceiling rather
+          than a flat panel that happens to be the same colour */}
       {Array.from({ length: 14 }, (_, i) => (
-        <Box key={i} x={i * 108 + 30} y={0} w={7} h={ROOM.ceiling} c="4" />
+        <Box key={i} x={i * 108 + 30} y={-HEADROOM} w={7} h={ROOM.ceiling + HEADROOM} c="4" />
       ))}
 
       {/* ══ upper storey ══ */}
@@ -556,8 +563,10 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
       ))}
 
       {/* the room falls away at both ends rather than stopping at a cut */}
-      <rect x={0} y={0} width={26} height={LOGICAL_H + BLEED} fill={PAL["0"]} opacity={0.55} />
-      <rect x={LOGICAL_W - 26} y={0} width={26} height={LOGICAL_H + BLEED} fill={PAL["0"]} opacity={0.55} />
+      <rect x={0} y={-HEADROOM} width={26} height={LOGICAL_H + BLEED + HEADROOM}
+        fill={PAL["0"]} opacity={0.55} />
+      <rect x={LOGICAL_W - 26} y={-HEADROOM} width={26} height={LOGICAL_H + BLEED + HEADROOM}
+        fill={PAL["0"]} opacity={0.55} />
     </g>
   );
 }

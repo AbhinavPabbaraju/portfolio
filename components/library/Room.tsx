@@ -1,7 +1,7 @@
 "use client";
 import { BAYS, type Book } from "@/lib/data/library";
 import { textArt, textW } from "@/lib/library/font";
-import { LOGICAL_H, LOGICAL_W, PAL, tone } from "@/lib/library/pixel";
+import { BLEED, LOGICAL_H, LOGICAL_W, PAL, tone } from "@/lib/library/pixel";
 import { BAY_W, BAY_X0, EAST, LAMPS, ROOM, TABLES, bayX, pierX } from "@/lib/library/scene";
 import Bookcase from "./Bookcase";
 import { COLD, Glow, Shaft } from "./Light";
@@ -88,8 +88,23 @@ const LAPTOP = [
 ];
 
 /** Where the floorboards fall, measured down from the wall junction. The gaps
- *  widen as they come forward, which is the room's only perspective. */
-const BOARDS = [4, 9, 15, 22, 30, 39, 49, 60];
+ *  widen as they come forward, which is the room's only perspective — 4, then
+ *  five more, then six, and so on.
+ *
+ *  Generated rather than listed because the floor now runs `BLEED` past the
+ *  bottom of the authored room (see `fitScale`), and a hand-written list would
+ *  have to be re-counted every time that number moved. The first eight values
+ *  are the ones this replaced, unchanged. */
+/** Where the floor starts going into shadow: one row below the near chairs'
+ *  feet, which stand eight in front of a table's front legs at `floor + 50`. */
+const FORE = ROOM.floor + 60;
+
+const BOARDS = (() => {
+  const out = [4];
+  for (let gap = 5; out[out.length - 1] < LOGICAL_H - ROOM.floor + BLEED; gap++)
+    out.push(out[out.length - 1] + gap);
+  return out;
+})();
 
 /** Table clutter: the difference between a table and a plank. */
 const MUG = [
@@ -190,7 +205,7 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
   return (
     <g shapeRendering="crispEdges">
       {/* ══ the shell ══ */}
-      <Box x={0} y={0} w={LOGICAL_W} h={LOGICAL_H} c="2" />
+      <Box x={0} y={0} w={LOGICAL_W} h={LOGICAL_H + BLEED} c="2" />
       <Box x={0} y={0} w={LOGICAL_W} h={ROOM.ceiling} c="1" />
       <Box x={0} y={ROOM.ceiling - 3} w={LOGICAL_W} h={3} c="4" />
       {/* the upper storey sits in its own darker band, which is what makes the
@@ -282,8 +297,14 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
           Lines only — no butt joints. Cross-marks were tried and every one of
           them landed as a header course: horizontal rules plus verticals at a
           regular offset is the drawing of a brick wall, not a floor, and the
-          room grew a patio the moment they went in. */}
-      <Box x={0} y={ROOM.floor} w={LOGICAL_W} h={LOGICAL_H - ROOM.floor} c="4" />
+          room grew a patio the moment they went in.
+
+          The floor is the one thing drawn past the bottom of the room, by
+          `BLEED`: the frame is a viewport and the room is a fixed number of
+          rows, so whatever the two disagree by lands here — as more floor
+          coming forward, never as bare frame under the boards. `fitScale`
+          picks the scale that keeps that surplus small. */}
+      <Box x={0} y={ROOM.floor} w={LOGICAL_W} h={LOGICAL_H + BLEED - ROOM.floor} c="4" />
       <Box x={0} y={ROOM.floor} w={LOGICAL_W} h={2} c="6" />
       {BOARDS.map((d) => (
         <g key={d}>
@@ -518,9 +539,25 @@ export default function Room({ onInspect }: { onInspect: (b: Book | null, at?: {
       <Vine x={bayX(0) + 2} y={ROOM.ceiling} len={14} seed={53} />
       <Vine x={bayX(2) + BAY_W - 4} y={ROOM.ceiling} len={11} seed={71} />
 
+      {/* ── the floor falls away in front of you ──
+          Four lamps hang over the middle of the room and nothing lights the
+          near edge of it, so the boards go into shadow as they come forward.
+          Stepped bands rather than a gradient, like every other fall-off in
+          here.
+
+          It starts a row below the nearest chair, so nothing standing on the
+          floor is dimmed by it, and it runs the whole depth of the `BLEED`.
+          That is the other half of its job: on a window the room does not
+          exactly fit, the surplus boards below the furniture are the far end
+          of this shadow rather than a lit floor with nothing standing on it. */}
+      {Array.from({ length: 14 }, (_, i) => (
+        <rect key={i} x={0} y={FORE + i * 16} width={LOGICAL_W} height={16}
+          fill={PAL["0"]} opacity={Math.min(0.92, 0.05 + i * 0.085)} />
+      ))}
+
       {/* the room falls away at both ends rather than stopping at a cut */}
-      <rect x={0} y={0} width={26} height={LOGICAL_H} fill={PAL["0"]} opacity={0.55} />
-      <rect x={LOGICAL_W - 26} y={0} width={26} height={LOGICAL_H} fill={PAL["0"]} opacity={0.55} />
+      <rect x={0} y={0} width={26} height={LOGICAL_H + BLEED} fill={PAL["0"]} opacity={0.55} />
+      <rect x={LOGICAL_W - 26} y={0} width={26} height={LOGICAL_H + BLEED} fill={PAL["0"]} opacity={0.55} />
     </g>
   );
 }

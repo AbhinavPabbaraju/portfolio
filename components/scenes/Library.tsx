@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Book } from "@/lib/data/library";
 import { textArt, textW } from "@/lib/library/font";
-import { LOGICAL_H, LOGICAL_W } from "@/lib/library/pixel";
+import { LOGICAL_H, LOGICAL_W, fitScale } from "@/lib/library/pixel";
 import Px, { Box } from "@/components/library/Px";
 import Room from "@/components/library/Room";
 import { refreshDeck } from "@/lib/lenis";
@@ -44,12 +44,19 @@ function Plaque({ book, at }: Inspect) {
 /** The reading room.
  *
  *  ── the scale is the whole trick ──
- *  Pixel art only survives at whole-number magnification. The frame therefore
- *  picks the smallest integer scale that still covers the viewport's height
- *  and sizes the room to exactly that; the room is wider than the screen at
- *  every scale, which is what there is to pan along. Letting the browser
- *  stretch the SVG to fit instead would put logical pixels on fractional
- *  device pixels, and the entire style depends on that never happening.
+ *  Pixel art only survives at whole-number magnification — of *device* pixels,
+ *  which is what `fitScale` picks, and why the room is not simply stretched to
+ *  the frame. The room is wider than the screen at every scale it picks, which
+ *  is what there is to pan along.
+ *
+ *  The height is the part that has no exact answer: the frame is a viewport
+ *  and the room is 320 rows, so the two never agree. The SVG covers the frame
+ *  and the drawing hangs from the top of it, so the ceiling meets the top edge
+ *  and the disagreement — however it falls — lands on the floor at the bottom,
+ *  where the drawing carries on for another `BLEED` rows. What this replaced
+ *  sized the SVG to the room instead and centred it, which split the mismatch
+ *  between the two ends: at 830px tall it cropped 65px off each, taking the
+ *  shelf signs off the top and the chairs' legs off the bottom.
  *
  *  The pan itself belongs to `CinemaDeck`, which drives `.lib-room` across
  *  the scene's dwell — long scroll timelines live there, not in scenes. */
@@ -63,28 +70,32 @@ export default function Library() {
   }, []);
 
   useEffect(() => {
-    /* The room's width changes in whole steps, and the deck's walk along the
-       wall is measured from it. A step therefore is a layout mutation and has
-       to refresh the deck, or the walk keeps travelling the distance measured
-       for the previous scale. */
+    /* The room's width changes in steps, and the deck's walk along the wall is
+       measured from it. A step therefore is a layout mutation and has to
+       refresh the deck, or the walk keeps travelling the distance measured for
+       the previous scale. (Only a step: a frame that changes height without
+       crossing one leaves the width alone, and there is nothing to refresh.) */
     let lastScale = 0;
     const fit = () => {
       const f = frame.current, r = room.current;
       if (!f || !r) return;
       const h = f.clientHeight;
       if (!h) return;
-      /* nearest integer, not `ceil`: rounding up overshot by nearly a whole
-         step at common heights and threw a fifth of the room off the top.
-         Rounding lands within half a step either way, and the room's ceiling
-         and floor are both near-black — so whether the surplus is crop or
-         letterbox, it is the same colour as the frame behind it. */
-      const scale = Math.max(1, Math.round(h / LOGICAL_H));
+      /* `fitScale` is where the whole argument lives: whole *device* pixels,
+         and of the two scales either side of an exact fit, the one that costs
+         less. What it cannot do is make the room exactly a viewport tall, so
+         the leftover is placed rather than split — the SVG covers the frame
+         and the room hangs from the top of it, which puts the ceiling on the
+         top edge and the surplus, whichever way it goes, at the bottom. That
+         is the end the drawing has `BLEED` for.
+
+         The room's own scale therefore lives in the viewBox, not in the
+         element's size: `h / scale` rows across `h` pixels is exactly
+         `scale`, and no rounding of a height can make it anything else. */
+      const scale = fitScale(h, window.devicePixelRatio || 1);
       r.setAttribute("width", String(LOGICAL_W * scale));
-      r.setAttribute("height", String(LOGICAL_H * scale));
-      /* centre the overflow vertically: the room is a whole number of pixels
-         tall and the viewport is not, so a sliver goes at each end rather
-         than all of it off the top */
-      r.style.top = Math.round((h - LOGICAL_H * scale) / 2) + "px";
+      r.setAttribute("height", String(h));
+      r.setAttribute("viewBox", `0 0 ${LOGICAL_W} ${h / scale}`);
       if (scale !== lastScale) {
         const first = lastScale === 0;
         lastScale = scale;

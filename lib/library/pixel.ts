@@ -30,6 +30,62 @@
 export const LOGICAL_W = 1500;
 export const LOGICAL_H = 320;
 
+/** How far the drawing carries on *below* the room, in logical pixels.
+ *
+ *  The room is a fixed number of rows tall and the frame it is shown in is a
+ *  viewport, so the two only agree by accident — see `fitScale`. Whatever is
+ *  left over is given to the floor, and this is how much floor there is to
+ *  give: more boards, drawn past the bottom of the authored room, seen only
+ *  as far down as the frame reaches. Two hundred covers the worst case a
+ *  1× screen can ask for (a ~510px frame, where the scale below is a whole
+ *  step too small and the one above slices the tables). It costs a box and a
+ *  dozen board lines whether it is seen or not. */
+export const BLEED = 200;
+
+/** How much worse a cropped row is than an empty one, choosing a scale.
+ *  Overshoot cuts the bottom off the drawing — the near chairs first, then
+ *  the tables — and undershoot only asks for more floorboards. */
+const CROP_COST = 3;
+
+/** The scale to draw the room at, for a frame `frameH` CSS pixels tall on a
+ *  screen of `dpr` device pixels to the CSS pixel.
+ *
+ *  Height only. Width takes care of itself: the room is 1500 logical pixels
+ *  across, so at any scale this returns it is wider than any frame short
+ *  enough to have asked for that scale, and the surplus width is the walk.
+ *
+ *  Two rules pull against each other here.
+ *
+ *  Pixel art survives only at a whole-number magnification — but whole
+ *  numbers of *device* pixels, not of CSS ones. On a 2× screen a CSS scale of
+ *  2.5 puts every logical pixel on exactly five device pixels and is precisely
+ *  as crisp as 3 is, so the scale moves in steps of `1/dpr`. That alone is
+ *  most of this: on any retina screen the steps are fine enough that the room
+ *  lands within a few rows of the frame whatever its height.
+ *
+ *  And the room has to *fill* the frame. It is shown top-anchored, so the
+ *  ceiling is always exactly at the top edge and the mismatch all lands at the
+ *  bottom: either the drawing runs out above the bottom of the frame, or it
+ *  carries on past it. The first is the one that reads as broken — bare frame
+ *  under the floorboards — and the second is only ever more floor, which
+ *  `BLEED` provides. So of the two scales either side of an exact fit, take
+ *  whichever costs less, counting a cropped row as `CROP_COST` empty ones.
+ *
+ *  This is what replaced rounding to the nearest whole CSS pixel. That put a
+ *  1512×830 laptop on 3×, a 960-tall room in an 830 frame, and cropped 65px
+ *  off *both* ends — the shelf signs at the top, the chair legs at the
+ *  bottom — with no scale available that did any better. */
+export function fitScale(frameH: number, dpr: number) {
+  const step = 1 / (dpr > 0 ? dpr : 1);
+  const under = Math.max(step, Math.floor(frameH / LOGICAL_H / step) * step);
+  const over = under + step;
+  const cost = (s: number) => {
+    const rows = frameH / s;                       // logical rows the frame shows
+    return rows >= LOGICAL_H ? rows - LOGICAL_H : (LOGICAL_H - rows) * CROP_COST;
+  };
+  return Math.max(1, cost(over) < cost(under) ? over : under);
+}
+
 /* ── the palette ──
    Deliberately small. A limited palette is what makes pixel art cohere: the
    same twenty-odd values recur everywhere, so a lamp and a book spine and a

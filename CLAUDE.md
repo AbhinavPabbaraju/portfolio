@@ -139,6 +139,32 @@ in, and a panel arriving one chunk later resizes it mid-fade.
   Any scrollable box inside the serving needs `data-lenis-prevent`, or the
   wheel moves the page instead.
 
+### The library: how the room meets its frame
+
+`.lib-frame` is one viewport; the room (`lib/library/pixel.ts`) is a fixed
+1500×320 logical grid. The two never agree, and everything in `fitScale` is
+about which way to spend the difference.
+
+- The scale is a whole number of **device** pixels, not of CSS ones — a step
+  of `1/dpr`. On a 2× screen 2.5 is exactly as crisp as 3, and those half
+  steps are what let the room land within a few rows of any frame height.
+- The room is **top-anchored**: the SVG covers the frame, the drawing hangs
+  from the top of it, so the ceiling is always on the top edge and the whole
+  mismatch lands at the bottom. The predecessor sized the SVG to the room and
+  centred it, which split the mismatch across both ends — at 830px tall it cut
+  the shelf signs off the top and the chairs' legs off the bottom.
+- So the floor carries on for `BLEED` rows past the room, under a stepped
+  shadow that deepens as it comes forward. That is what the surplus is dressed
+  in when the frame is taller than the room; when it is shorter, the same
+  scale choice keeps the crop inside the empty boards. Bare frame under the
+  floorboards is the one outcome that reads as broken, so `fitScale` counts a
+  cropped row as three empty ones and takes the cheaper of the two scales
+  either side of an exact fit.
+- The scale is written into the **viewBox**, not into the element's size:
+  `h / scale` rows across `h` pixels is exactly `scale`, whatever `h` is.
+  A scale change resizes the room, so it is a layout mutation — `fit()` calls
+  `refreshDeck()`, or the deck's walk keeps travelling the old distance.
+
 ## Motion rules
 
 These exist because each one was a visible bug on this page. Breaking one

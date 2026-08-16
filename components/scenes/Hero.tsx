@@ -4,7 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import * as THREE from "three";
 import AsciiGlitchName from "@/components/ui/AsciiGlitchName";
-import { DUR, EASE, prefersReducedMotion } from "@/lib/motion";
+import { DUR, EASE } from "@/lib/motion";
 
 /* ---- volumetric fresnel field (R3F port of the legacy hero) ---- */
 const FRESNEL = {
@@ -86,44 +86,8 @@ function TermLoop() {
   );
 }
 
-/* ---- the little car laps the telemetry track ---- */
-function useLapCar(svg: React.RefObject<SVGSVGElement | null>, running: boolean) {
-  const lap = useRef(0);                       // survives pausing, so the car resumes
-  useEffect(() => {
-    const root = svg.current;
-    if (!root || !running || prefersReducedMotion()) return;
-    const path = root.querySelector<SVGPathElement>("#lapPath");
-    const car = root.querySelector<SVGGElement>("#lapCar");
-    if (!path || !car) return;
-
-    /* Sample the track once. Two `getPointAtLength` calls per frame meant
-       re-walking the path geometry sixty times a second for a 20px car. */
-    const len = path.getTotalLength();
-    const N = 480;
-    const pts = Array.from({ length: N + 1 }, (_, i) => path.getPointAtLength((i / N) * len));
-    const angles = pts.map((p, i) => {
-      const a = i < N ? p : pts[N - 1];
-      const b = i < N ? pts[i + 1] : p;
-      return (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
-    });
-
-    let raf = 0, last = 0;
-    const tick = (now: number) => {
-      raf = requestAnimationFrame(tick);
-      const dt = last ? Math.min(now - last, 50) / 1000 : 0;
-      last = now;
-      lap.current = (lap.current + dt * 0.096) % 1;   // one lap ≈ 10.4s, wall-clock
-      const i = Math.floor(lap.current * N);
-      const p = pts[i];
-      car.setAttribute("transform", `translate(${p.x},${p.y}) rotate(${angles[i]})`);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [svg, running]);
-}
-
 /** True while the section is anywhere near the viewport. Everything the
- *  hero renders — WebGL field, ASCII wordmark, lap car — is expensive and
+ *  hero renders — the WebGL field, the ASCII wordmark — is expensive and
  *  none of it was pausing once you scrolled past it. */
 function useOnScreen(ref: React.RefObject<HTMLElement | null>) {
   const [on, setOn] = useState(true);
@@ -138,10 +102,8 @@ function useOnScreen(ref: React.RefObject<HTMLElement | null>) {
 }
 
 export default function Hero() {
-  const lap = useRef<SVGSVGElement>(null);
   const section = useRef<HTMLElement>(null);
   const onScreen = useOnScreen(section);
-  useLapCar(lap, onScreen);
   return (
     <section className="hero" ref={section}>
       <div id="field" aria-hidden>
@@ -190,16 +152,6 @@ export default function Hero() {
           <div className="cell"><div className="k">Next</div><div className="v">LOB<small>·µs</small></div></div>
         </div>
       </div>
-      <svg id="lap" ref={lap} viewBox="0 0 1200 220" preserveAspectRatio="none" aria-hidden>
-        <path className="track" id="lapPath" d="M-40,170 C120,170 150,60 300,60 S480,180 620,180 S760,40 900,40 S1080,150 1240,150" />
-        <g id="lapCar">
-          <ellipse className="car-glow" cx={0} cy={0} rx={14} ry={5} opacity={0.25} />
-          <rect className="car-body" x={-11} y={-4} width={22} height={8} rx={4} />
-          <rect className="car-body" x={6} y={-2.5} width={7} height={5} rx={2.5} opacity={0.7} />
-          <circle cx={-6} cy={5} r={3} fill="#101a23" stroke="#8fbcd4" strokeWidth={1.4} />
-          <circle cx={6} cy={5} r={3} fill="#101a23" stroke="#8fbcd4" strokeWidth={1.4} />
-        </g>
-      </svg>
     </section>
   );
 }

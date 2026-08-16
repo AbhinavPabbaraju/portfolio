@@ -31,7 +31,7 @@ function Clock() {
     const t = setInterval(read, 1000);
     return () => clearInterval(t);
   }, []);
-  return <span className="clock"><span className="dot" aria-hidden /> {time}</span>;
+  return <span className="clock">{time}</span>;
 }
 
 /** Card-style navigation: compact bar that expands into link cards. */
@@ -65,7 +65,7 @@ export default function CardNav() {
   return (
     <header className={`cardnav${scrolled ? " scrolled" : ""}`} ref={root}>
       <div className="cn-bar wrap">
-        <a className="cn-brand" href="#main">AP · systems</a>
+        <a className="cn-brand" href="#main">AP</a>
         <Clock />
         <button
           className="cn-toggle" type="button" ref={toggle}

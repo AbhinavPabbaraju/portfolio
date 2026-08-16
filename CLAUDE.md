@@ -148,11 +148,18 @@ about which way to spend the difference.
 - The scale is a whole number of **device** pixels, not of CSS ones — a step
   of `1/dpr`. On a 2× screen 2.5 is exactly as crisp as 3, and those half
   steps are what let the room land within a few rows of any frame height.
-- The room is **top-anchored**: the SVG covers the frame, the drawing hangs
-  from the top of it, so the ceiling is always on the top edge and the whole
-  mismatch lands at the bottom. The predecessor sized the SVG to the room and
-  centred it, which split the mismatch across both ends — at 830px tall it cut
-  the shelf signs off the top and the chairs' legs off the bottom.
+- The room is **anchored under the page's bar**, not at the top of the frame.
+  `.cardnav` is fixed, opaque and `--chrome-h` tall over every scene; every
+  other one has section padding for it to float over, and this one is a
+  picture to the top edge, so the bar was standing on the cornice and the bay
+  signs. `fit()` insets the drawing by `--chrome-h` and carries the ceiling up
+  behind it (`HEADROOM`), and `fitScale` is given the frame *less* the bar —
+  the room has to fit what you can see, not what it occupies. `--chrome-h` and
+  `.cn-bar`'s height are the same token for that reason.
+- The whole mismatch therefore lands at the bottom. The predecessor sized the
+  SVG to the room and centred it in the frame, which split it across both ends
+  — at 830px tall it cut the shelf signs off the top and the chairs' legs off
+  the bottom, and then the bar took the next 62px.
 - So the floor carries on for `BLEED` rows past the room, under a stepped
   shadow that deepens as it comes forward. That is what the surplus is dressed
   in when the frame is taller than the room; when it is shorter, the same

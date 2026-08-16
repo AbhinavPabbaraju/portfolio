@@ -50,13 +50,14 @@ function Plaque({ book, at }: Inspect) {
  *  is what there is to pan along.
  *
  *  The height is the part that has no exact answer: the frame is a viewport
- *  and the room is 320 rows, so the two never agree. The SVG covers the frame
- *  and the drawing hangs from the top of it, so the ceiling meets the top edge
- *  and the disagreement — however it falls — lands on the floor at the bottom,
- *  where the drawing carries on for another `BLEED` rows. What this replaced
- *  sized the SVG to the room instead and centred it, which split the mismatch
- *  between the two ends: at 830px tall it cropped 65px off each, taking the
- *  shelf signs off the top and the chairs' legs off the bottom.
+ *  and the room is 320 rows, so the two never agree. The SVG covers the frame;
+ *  the drawing hangs from the bottom of the page's fixed bar, with its ceiling
+ *  carried up behind that; and the disagreement — however it falls — lands on
+ *  the floor at the bottom, where the drawing carries on for another `BLEED`
+ *  rows. What this replaced sized the SVG to the room and centred it in the
+ *  frame, which both split the mismatch across the two ends and ignored the
+ *  bar: at 830px tall it cropped 65px off each, and the top of what was left
+ *  was behind 62px of chrome.
  *
  *  The pan itself belongs to `CinemaDeck`, which drives `.lib-room` across
  *  the scene's dwell — long scroll timelines live there, not in scenes. */
@@ -81,21 +82,32 @@ export default function Library() {
       if (!f || !r) return;
       const h = f.clientHeight;
       if (!h) return;
-      /* `fitScale` is where the whole argument lives: whole *device* pixels,
-         and of the two scales either side of an exact fit, the one that costs
-         less. What it cannot do is make the room exactly a viewport tall, so
-         the leftover is placed rather than split — the SVG covers the frame
-         and the room hangs from the top of it, which puts the ceiling on the
-         top edge and the surplus, whichever way it goes, at the bottom. That
-         is the end the drawing has `BLEED` for.
+      /* ── what the room actually has to fit in ──
+         Not the frame: the frame less the page's own bar, which is fixed over
+         the top of it. Every other scene has section padding for that bar to
+         float over; this one is a picture running to the top edge, so the top
+         `--chrome-h` of it was simply not on screen — ceiling, cornice and the
+         bay signs, behind an opaque strip. The room is inset by exactly that
+         and its ceiling drawn up behind it (`HEADROOM`), so the bar stands on
+         the room's own dark and the drawing starts where the page does. */
+      const chrome = parseFloat(
+        getComputedStyle(document.documentElement).getPropertyValue("--chrome-h"),
+      ) || 0;
+
+      /* `fitScale` is where the rest of the argument lives: whole *device*
+         pixels, and of the two scales either side of an exact fit, the one
+         that costs less. What it cannot do is make the room exactly as tall as
+         the clear part of the frame, so the leftover is placed rather than
+         split — the room hangs from under the bar and the surplus, whichever
+         way it goes, lands at the bottom. That is the end `BLEED` is for.
 
          The room's own scale therefore lives in the viewBox, not in the
          element's size: `h / scale` rows across `h` pixels is exactly
          `scale`, and no rounding of a height can make it anything else. */
-      const scale = fitScale(h, window.devicePixelRatio || 1);
+      const scale = fitScale(h - chrome, window.devicePixelRatio || 1);
       r.setAttribute("width", String(LOGICAL_W * scale));
       r.setAttribute("height", String(h));
-      r.setAttribute("viewBox", `0 0 ${LOGICAL_W} ${h / scale}`);
+      r.setAttribute("viewBox", `0 ${-chrome / scale} ${LOGICAL_W} ${h / scale}`);
       if (scale !== lastScale) {
         const first = lastScale === 0;
         lastScale = scale;

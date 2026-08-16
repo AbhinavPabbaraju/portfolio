@@ -42,13 +42,27 @@ export const LOGICAL_H = 320;
  *  dozen board lines whether it is seen or not. */
 export const BLEED = 200;
 
+/** How far the ceiling carries on *above* the room, in logical pixels.
+ *
+ *  The page's chrome — a 62px bar — is fixed over the top of every scene. Every
+ *  other one has section padding for it to float over; this one is a picture
+ *  running to the top edge, so the bar was landing on the cornice and the bay
+ *  signs. The room is inset by the height of the bar and this is what goes
+ *  behind it: more ceiling, so the bar sits on the room's own dark rather than
+ *  on a cut. Sixty-four rows is the whole bar even at 1×. */
+export const HEADROOM = 64;
+
 /** How much worse a cropped row is than an empty one, choosing a scale.
  *  Overshoot cuts the bottom off the drawing — the near chairs first, then
  *  the tables — and undershoot only asks for more floorboards. */
 const CROP_COST = 3;
 
-/** The scale to draw the room at, for a frame `frameH` CSS pixels tall on a
- *  screen of `dpr` device pixels to the CSS pixel.
+/** The scale to draw the room at, for `clearH` CSS pixels of frame on a screen
+ *  of `dpr` device pixels to the CSS pixel.
+ *
+ *  `clearH` is the frame *less the page chrome standing over it* — the room
+ *  has to fit in the part of the frame you can actually see, not in the part
+ *  it occupies.
  *
  *  Height only. Width takes care of itself: the room is 1500 logical pixels
  *  across, so at any scale this returns it is wider than any frame short
@@ -75,12 +89,12 @@ const CROP_COST = 3;
  *  1512×830 laptop on 3×, a 960-tall room in an 830 frame, and cropped 65px
  *  off *both* ends — the shelf signs at the top, the chair legs at the
  *  bottom — with no scale available that did any better. */
-export function fitScale(frameH: number, dpr: number) {
+export function fitScale(clearH: number, dpr: number) {
   const step = 1 / (dpr > 0 ? dpr : 1);
-  const under = Math.max(step, Math.floor(frameH / LOGICAL_H / step) * step);
+  const under = Math.max(step, Math.floor(clearH / LOGICAL_H / step) * step);
   const over = under + step;
   const cost = (s: number) => {
-    const rows = frameH / s;                       // logical rows the frame shows
+    const rows = clearH / s;                       // logical rows in the clear
     return rows >= LOGICAL_H ? rows - LOGICAL_H : (LOGICAL_H - rows) * CROP_COST;
   };
   return Math.max(1, cost(over) < cost(under) ? over : under);

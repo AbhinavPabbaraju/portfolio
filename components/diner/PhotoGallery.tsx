@@ -3,12 +3,17 @@ import { forwardRef } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 import { DUR, EASE } from "@/lib/motion";
 
-const SLOTS = [1, 2, 3, 4, 5, 6];
-
 interface Props { visible: boolean; onLeave: () => void }
 
-/** Inside the vending machine — placeholder polaroids until the film arrives.
- *  Framer Motion staggers the prints; GSAP handles the camera getting here. */
+/** Inside the vending machine — one undeveloped print until the film arrives.
+ *
+ *  This used to be six numbered slots reading "photo 01 · loading film"
+ *  through 06, which claimed six photographs exist and are merely late. They
+ *  do not. One honest card says the same thing without the false count, and
+ *  it takes the fourth horizontal scroll region off the page: a strip you
+ *  drag along needs more than one thing in it to be worth dragging.
+ *
+ *  Framer Motion brings the print in; GSAP handles the camera getting here. */
 const PhotoGallery = forwardRef<HTMLDivElement, Props>(function PhotoGallery({ visible, onLeave }, ref) {
   const reduce = useReducedMotion();
   return (
@@ -22,21 +27,18 @@ const PhotoGallery = forwardRef<HTMLDivElement, Props>(function PhotoGallery({ v
               <div className="mh-sub">dispensed by the machine outside — one coin, one memory</div>
               <div className="mh-rule" aria-hidden />
             </header>
-            <div className="photo-strip" tabIndex={0} aria-label="Photo collection, scroll horizontally">
-              {SLOTS.map((n, i) => (
-                <motion.figure
-                  className="polaroid"
-                  key={n}
-                  initial={reduce ? false : { y: 26, opacity: 0 }}
-                  animate={visible ? { y: 0, opacity: 1 } : {}}
-                  transition={{ duration: DUR.md, delay: 0.35 + i * 0.09, ease: EASE.out }}
-                >
-                  <div className="ph" />
-                  <figcaption>photo {String(n).padStart(2, "0")} · loading film</figcaption>
-                </motion.figure>
-              ))}
+            <div className="photo-strip is-empty">
+              <motion.figure
+                className="polaroid"
+                initial={reduce ? false : { y: 26, opacity: 0 }}
+                animate={visible ? { y: 0, opacity: 1 } : {}}
+                transition={{ duration: DUR.md, delay: 0.35, ease: EASE.out }}
+              >
+                <div className="ph" />
+                <figcaption>the roll is still in the camera</figcaption>
+              </motion.figure>
             </div>
-            <p className="photo-tip">drag or scroll sideways — prints from the roll, coming soon</p>
+            <p className="photo-tip">nothing developed yet — come back when the light has been good</p>
             <footer className="menu-foot">
               <span>film · Hyderabad → wherever the light is good</span>
               <span>shot by Abhinav Pabbaraju</span>

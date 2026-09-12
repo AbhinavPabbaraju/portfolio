@@ -27,10 +27,10 @@ export default function Now() {
   return (
     <section className="block" id="now">
       <div className="wrap">
-        <SectionHead title="On the grid this season." />
+        <SectionHead title="What I’m building now." />
         <p className="now-intro">
-          Three lanes open at once: the F1 dashboard getting its final polish,
-          a systems paper turning into running code, and the next benchmark on the bench.
+          Three things open at once: the F1 dashboard getting its final polish,
+          a systems paper turning into running code, and the next build on the bench.
         </p>
         <div className="now-grid">
           {CARDS.map((c, i) => (

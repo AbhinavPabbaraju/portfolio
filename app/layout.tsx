@@ -17,14 +17,19 @@ const hand = Caveat({ subsets: ["latin"], weight: ["500", "600"], variable: "--f
 const mincho = Zen_Old_Mincho({ subsets: ["latin"], weight: ["400", "700", "900"], variable: "--f-serif" });
 
 const TITLE = "Abhinav Pabbaraju — systems engineer";
+/* Every character here is spent on a SERP reader who has no context for the
+   site's framing yet, so it names the work rather than the restaurant. */
 const DESCRIPTION =
-  "Systems-depth portfolio: distributed consensus, compiler backends, GPU physics, low-latency. Served nightly at the Systems Diner.";
+  "Systems engineer. Raft consensus in Go, an optimizing C++ compiler to x86-64, GPU N-body physics, and low-latency infrastructure.";
 
 export const metadata: Metadata = {
   title: TITLE,
   description: DESCRIPTION,
   metadataBase: new URL("https://abhinavpabbaraju.com"),
-  applicationName: "Systems Diner",
+  /* Same string as `openGraph.siteName`: the two name the same site, and
+     splitting them put "Systems Diner" on installs and the real name on
+     shares. The diner is the page's framing, not the site's identity. */
+  applicationName: "Abhinav Pabbaraju",
   authors: [{ name: "Abhinav Pabbaraju", url: "https://github.com/AbhinavPabbaraju" }],
   creator: "Abhinav Pabbaraju",
   keywords: [

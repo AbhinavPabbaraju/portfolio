@@ -34,7 +34,7 @@ export default function Showcase() {
         <div className="core" aria-hidden>
           <div>
             <div className="big">WORK</div>
-            <div className="small">05 entries · season 2026</div>
+            <div className="small">05 projects</div>
           </div>
         </div>
         <Carousel onOpen={open} />

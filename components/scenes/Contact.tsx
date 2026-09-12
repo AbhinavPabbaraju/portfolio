@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import RotatingWord from "@/components/ui/RotatingWord";
 import GhostPill from "@/components/ui/GhostPill";
 import Footer from "@/components/chrome/Footer";
@@ -64,6 +64,49 @@ function useDonut(ref: React.RefObject<HTMLPreElement | null>) {
   }, [ref]);
 }
 
+const EMAIL = "pabhinav2006@gmail.com";
+
+/** The second half of the conversion point.
+ *
+ *  `mailto:` is the primary CTA and on a desktop with no mail client
+ *  configured it does nothing at all — the visitor clicks the one button the
+ *  page is built around and gets silence. This puts the address itself on the
+ *  clipboard, which works everywhere, and falls back to simply showing it if
+ *  the Clipboard API is unavailable (it needs a secure context). */
+function CopyEmail() {
+  const [state, setState] = useState<"idle" | "copied" | "shown">("idle");
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+
+  const copy = useCallback(async () => {
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(EMAIL);
+      ok = true;
+    } catch { /* insecure context or denied — fall through to showing it */ }
+    setState(ok ? "copied" : "shown");
+    if (timer.current) clearTimeout(timer.current);
+    timer.current = setTimeout(() => setState("idle"), ok ? 2000 : 8000);
+  }, []);
+
+  return (
+    <button
+      type="button"
+      className="ghost-pill"
+      data-copied={state === "copied" ? "1" : undefined}
+      onClick={copy}
+    >
+      {state === "copied" ? "Copied ✓" : state === "shown" ? EMAIL : "Copy address"}
+      {/* The label change is the only feedback, so it has to reach a screen
+          reader too — the button's own name is not re-announced on click. */}
+      <span className="sr-only" role="status">
+        {state === "copied" ? `${EMAIL} copied to clipboard` : state === "shown" ? `Email address: ${EMAIL}` : ""}
+      </span>
+    </button>
+  );
+}
+
 export default function Contact() {
   const donut = useRef<HTMLPreElement>(null);
   useDonut(donut);
@@ -77,10 +120,15 @@ export default function Contact() {
         </h2>
         <p className="sub">
           Open to internships and collaborations in systems, low-latency, and infrastructure.
-          Fastest reply is by email. <span className="hand">— no really, email me :)</span>
+          Email is fastest.
         </p>
         <div className="cta-row">
-          <GhostPill href="mailto:pabhinav2006@gmail.com">Email me</GhostPill>
+          <GhostPill href={`mailto:${EMAIL}`}>Email me</GhostPill>
+          <CopyEmail />
+          {/* A recruiter who likes the page had exactly one action available —
+              write an email from scratch — and nothing they could forward
+              internally. `public/resume.pdf` is the file; see public/README. */}
+          <GhostPill href="/resume.pdf" target="_blank" rel="noopener noreferrer">Résumé ↗</GhostPill>
           <GhostPill href="https://github.com/AbhinavPabbaraju" target="_blank" rel="noopener noreferrer">GitHub ↗</GhostPill>
           <GhostPill href="https://www.linkedin.com/in/abhinav-pabbaraju" target="_blank" rel="noopener noreferrer">LinkedIn ↗</GhostPill>
         </div>

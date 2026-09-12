@@ -139,16 +139,24 @@ export default function Hero() {
           </span>{" "}
           in software.
         </p>
-        <div className="termline" aria-label="currently working on">
-          <span className="ps">abby@systems:~$</span>
-          <span>tail -f</span>
+        {/* `aria-label` on a bare div is ignored by most screen readers, so
+            the shell prompt and the `tail -f` were being read out as prose.
+            The group carries the label; the terminal costume is decoration
+            and the filename is the only part that is information. */}
+        <div className="termline" role="group" aria-label="Currently working on">
+          <span className="ps" aria-hidden>abby@systems:~$</span>
+          <span aria-hidden>tail -f</span>
           <TermLoop />
           <span className="caret" aria-hidden />
         </div>
+        {/* Three cells, not four. The fourth was "Shipped · 14K+ LOC", which
+            failed twice: lines of code is the metric the About copy two
+            scenes down says it distrusts, and the number was wrong anyway —
+            Phalanx and ricc alone come to 14.2K before three more projects
+            exist. Nothing claimed up here that isn't backed. */}
         <div className="hero-meta">
           <div className="cell"><div className="k">Focus</div><div className="v">Systems<small>·LL</small></div></div>
           <div className="cell"><div className="k">Building</div><div className="v">F1<small>·2026</small></div></div>
-          <div className="cell"><div className="k">Shipped</div><div className="v">14K+<small>LOC</small></div></div>
           <div className="cell"><div className="k">Next</div><div className="v">LOB<small>·µs</small></div></div>
         </div>
       </div>

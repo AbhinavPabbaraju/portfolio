@@ -164,6 +164,9 @@ h1.name .accent{color:var(--accent)}
   .hero-meta{border-bottom:none}
   .hero-meta .cell{flex:1 1 50%;border-bottom:1px solid var(--line)}
   .hero-meta .cell:nth-child(2){border-right:none}
+  /* An odd number of cells leaves the last one alone on its row at half
+     width, with bare container behind it. Let it take the rest of the row. */
+  .hero-meta .cell:last-child{flex-grow:1}
 }
 .scroll-cue{position:absolute;bottom:26px;left:50%;transform:translateX(-50%);z-index:2;font-family:var(--f-mono);font-size:10px;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;display:flex;flex-direction:column;align-items:center;gap:10px}
 .scroll-cue i{width:1px;height:38px;background:linear-gradient(var(--accent),transparent);animation:cue 1.8s var(--ease) infinite}
@@ -201,6 +204,11 @@ h1.name .accent{color:var(--accent)}
   color:var(--text);border:1px solid rgba(232,238,241,.6);border-radius:var(--r-pill);padding:10px 24px;
   transition:border-color var(--dur-sm) var(--ease),color var(--dur-sm) var(--ease)}
 .ghost-pill:hover{border-color:var(--ember);color:var(--ember)}
+/* The copy-address pill is a <button>, which does not inherit the anchor's
+   background or line-height, and whose label swaps to a confirmation —
+   fixed inline-size so the row does not reflow when it does. */
+button.ghost-pill{background:none;line-height:inherit;cursor:pointer;min-width:15ch;text-align:center}
+button.ghost-pill[data-copied="1"]{border-color:var(--accent-2);color:var(--accent-2)}
 
 /* rotating word in the contact headline */
 .rotor{display:inline-block;overflow:hidden;vertical-align:bottom;white-space:nowrap;color:var(--accent-2);
@@ -1102,6 +1110,10 @@ section.cafe{padding-bottom:0}
 .photo-strip::-webkit-scrollbar{height:8px}
 .photo-strip::-webkit-scrollbar-thumb{background:rgba(43,35,24,.25);border-radius:var(--r-md)}
 .photo-strip:focus-visible{outline:2px solid var(--shu);outline-offset:4px;border-radius:var(--r-sm)}
+/* While the roll is undeveloped there is one print, which centres rather
+   than sitting hard left with a scrollbar under it advertising nothing. */
+.photo-strip.is-empty{justify-content:center;overflow-x:visible;scroll-snap-type:none}
+.photo-strip.is-empty .polaroid{--tilt:-1.2deg}
 .polaroid{flex:0 0 auto;scroll-snap-align:center;margin:0;background:#fdf9f0;border:1px solid rgba(43,35,24,.14);
   padding:10px 10px 12px;box-shadow:0 12px 26px rgba(0,0,0,.15);transform:rotate(var(--tilt,0deg))}
 .polaroid:nth-child(odd){--tilt:-1.2deg}
